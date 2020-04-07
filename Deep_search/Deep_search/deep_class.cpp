@@ -201,33 +201,7 @@ peptide_lists deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
 peptide_lists deep_functions::lcd(peptide_lists& my_peptide_lists) {
 	
 
-	/*for (int i = 0; i < my_peptide_lists.tryp_unique.size(); i++) {
-		for (int j = 0; j < my_peptide_lists.miss_unique.size(); j++) {
-			size_t found = my_peptide_lists.tryp_unique[i].pep_seq.find(my_peptide_lists.miss_unique[j].pep_seq);
-			if (found != string::npos && (my_peptide_lists.miss_unique[j].pep_seq != my_peptide_lists.tryp_unique[i].pep_seq)) {
-				my_peptide_lists.tryp_unique[i].d_pep_seq = my_peptide_lists.miss_unique[j].pep_seq;
-				my_peptide_lists.tryp_unique[i].d_pep_seq_rt = my_peptide_lists.miss_unique[j].rtime;
-				if (found == 0) {
-					my_peptide_lists.tryp_unique[i].cleave_loc = 'R';
-					my_peptide_lists.tryp_unique[i].cleave_pos = found;
-
-				}
-				else {
-					my_peptide_lists.tryp_unique[i].cleave_loc = 'L';
-					my_peptide_lists.tryp_unique[i].cleave_pos = found;
-
-				}
-				my_peptide_lists.tryp_unique[i].d_pep_seq_mass = my_peptide_lists.miss_unique[j].mass;
-				my_peptide_lists.tryp_unique[i].d_pep_seq_charge = my_peptide_lists.miss_unique[j].charge;
-			}
-			
-			
-		}
-
-		my_peptide_lists.tryp_unique[i].mz = (my_peptide_lists.tryp_unique[i].mass + ((my_peptide_lists.tryp_unique[i].charge) * 1.00727)) / my_peptide_lists.tryp_unique[i].charge;
-		my_peptide_lists.tryp_unique[i].d_pep_seq_mz = (my_peptide_lists.tryp_unique[i].d_pep_seq_mass + ((my_peptide_lists.tryp_unique[i].d_pep_seq_charge) * 1.00727)) / my_peptide_lists.tryp_unique[i].d_pep_seq_charge;
-	}*/
-
+	
 
 
 	for (int i = 0; i < my_peptide_lists.miss_unique.size(); i++) {
@@ -283,6 +257,8 @@ peptide_lists deep_functions::new_list(peptide_lists& my_peptide_lists) {
 		}
 
 	}
+
+	cout << my_peptide_lists.d_list.size() << endl; 
 
 	/*for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
 		cout << my_peptide_lists.d_list[i].pep_seq << "  " << my_peptide_lists.d_list[i].charge << "   " << my_peptide_lists.d_list[i].mass << "  " << my_peptide_lists.d_list[i].mz << "  " << my_peptide_lists.d_list[i].cleave_loc << "   " << my_peptide_lists.d_list[i].cleave_pos << " ||||| " << my_peptide_lists.d_list[i].d_pep_seq << "  " << my_peptide_lists.d_list[i].d_pep_seq_charge << "  " << my_peptide_lists.d_list[i].d_pep_seq_mass << "  " << my_peptide_lists.d_list[i].d_pep_seq_mz << endl;

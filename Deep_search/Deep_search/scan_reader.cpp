@@ -154,7 +154,7 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 	// END MZML FUNCTION
 
 	cout << "pass 2 done" << "\n" << endl; 
-
+	cout << my_match_lists.results.size() << endl;
 
 	// DELETE DUPLICATES (DD)
 	for (int i = 0; i < my_match_lists.results.size() - 1; i++) {
@@ -165,6 +165,8 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 			}
 		}
 	}
+	cout << my_match_lists.results.size() << endl; 
+	cout << my_match_lists.results1.size() << endl;
 
 	for (int i = 0; i < my_match_lists.results1.size() - 1; i++) {
 		for (int j = i + 1; j < my_match_lists.results1.size(); j++) {
@@ -174,6 +176,7 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 			}
 		}
 	}
+	cout << my_match_lists.results1.size() << endl;
 
 	// END DD FUNCTION
 
@@ -187,6 +190,13 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 
 peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics, match_lists& my_match_lists) {
 
+
+	//cout << "sort started" << "\n" << endl;
+	//cout << my_match_lists.results.size() << endl; 
+	///*for (int i = 0; i < my_match_lists.results.size(); i++) {
+	//	cout << my_match_lists.results[i].pep_seq << endl;
+	//}*/
+	//cout << "print done" << endl; 
 
 	//ORDER PEPTIDES AND PUT INTO VECOTR OF VECTORS (VV)
 	int q = 0;
