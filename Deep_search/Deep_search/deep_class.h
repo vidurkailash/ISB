@@ -4,11 +4,9 @@
 #include "deep_structs.h"
 #include <vector> 
 
-
-
 class peptide_lists {
 public:
-	double total = 0;
+	int total = 0;
 	std::vector<my_features> all;
 	std::vector<my_features> tryptic;
 	std::vector<my_features> non_tryptic;
@@ -40,14 +38,12 @@ public:
 	peptide_lists tryptic_calc(peptide_lists& my_peptide_lists);
 	peptide_lists miss_cleave(peptide_lists& my_peptide_lists);
 	peptide_lists delete_dup(peptide_lists& my_peptide_lists);
-	match_lists mzml(peptide_lists& my_peptide_lists, my_parameters& my_params);
+	//match_lists mzml(peptide_lists& my_peptide_lists, my_parameters& my_params);
 	peptide_lists reader(peptide_lists& my_peptide_lists, metrics& my_metrics, match_lists& my_match_lists);
 	metrics calc(peptide_lists& my_peptide_lists, metrics& my_metrics);
 	peptide_lists lcd(peptide_lists& my_peptide_lists); 
 	peptide_lists new_list(peptide_lists& my_peptide_lists); 
 	metrics calc1(peptide_lists& my_peptide_lists, metrics& my_metircs, my_parameters& my_params);
-	
-
 
 };
 

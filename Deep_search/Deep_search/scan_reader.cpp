@@ -1,23 +1,9 @@
-#include <string.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map> 
-#include <algorithm>
-#include <list>
-#include <iterator>
-#include <cstdio>
-#include<numeric>
-#include "deep_class.h"
-#include "MSReader.h"
+#include "scan_reader.h"
 
 using namespace std;
 using namespace MSToolkit;
 
-
-
-match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters& my_params) {
+match_lists scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& my_params) {
 
 	//READ MZML FILE FOR BOTH FULLY TRYPTIC AND MISCLEAVED PEPTIDES (MZML)
 	cout << "starting pass 1" << "\n" << endl; 
@@ -29,54 +15,89 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 	myfile.readFile(my_params.mzml.c_str(), mySpec);
 
 
-	match_lists my_match_lists;
+  //MH: We need to get through precursor peak extraction fast.
+  //To do so, we need to do it a) using a single pass through all arrays, and
+  //b) using fast lookups instead of full iteration.
+  //Step 1 is to sort my_peptide_lists.dlist
+  sort(my_peptide_lists.d_list.begin(),my_peptide_lists.d_list.end(),compareRTime);
+  size_t pepIndex=0; // we will start from the first sorted peptide
 
+	match_lists my_match_lists;
 
 	int b = 0;
 	int c = 0;
 	while (mySpec.getRTime() != 0) {
 
-		/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl; */
+    //MH: Instead of iterating over all peptides, just iterate over the ones related to this spectrum
+    //First we adjust our start point to the next peptide that falls within our RT window
+    size_t i=pepIndex;
+    while(i<my_peptide_lists.d_list.size() && (my_peptide_lists.d_list[i].rtime/60) < (mySpec.getRTime()-2) ) i++;
+    if(i==my_peptide_lists.d_list.size()) break; //if we've checked every peptide, stop now.
+    pepIndex=i; //mark our new start point for the next iteration
 
-		for (int z = 0; z < mySpec.size(); z++) {
-			/*cout << "-------------" << mySpec.getScanNumber() << "----------" << endl; */
-			/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;*/
-			for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
-				/*cout << my_peptide_lists.d_list[i].rtime / 60 << "      " << my_peptide_lists.d_list[i].d_pep_seq_rt / 60 << endl;*/
+    //MH: From here, iterate over all peptides until we reach the end of our RT window
+    while(i < my_peptide_lists.d_list.size() && (my_peptide_lists.d_list[i].rtime / 60) < (mySpec.getRTime() + 2) ){
 
-				if (((my_peptide_lists.d_list[i].rtime / 60) <= mySpec.getRTime() + 2) && ((my_peptide_lists.d_list[i].rtime / 60) >= mySpec.getRTime() - 2) && (my_peptide_lists.d_list[i].mz <= mySpec[z].mz + 0.01) && (my_peptide_lists.d_list[i].mz >= mySpec[z].mz - 0.01)) {
+      //MH: Now we have to check for the peak itself in this spectrum.
+      //Instead of iterating over the whole spectrum, just do a binary search to
+      //rapidly find the position in the array.
+      int ret = findPeakMZ(mySpec, my_peptide_lists.d_list[i].mz,0.01);
+      if(ret>-1) {
+        my_match_lists.results.push_back(my_markers()); //input 
+        my_match_lists.results.back().spec_rt = mySpec.getRTime(); //input
+        my_match_lists.results.back().spec_sn = mySpec.getScanNumber(); //input
+        my_match_lists.results.back().spec_size = mySpec.size(); //input
+        my_match_lists.results.back().spec_mz = mySpec[ret].mz; //input
+        my_match_lists.results.back().spec_intensity = mySpec[ret].intensity; //input
+        my_match_lists.results.back().mzml_mz = my_peptide_lists.d_list[i].mz; //input   
+        my_match_lists.results.back().mzml_rt = my_peptide_lists.d_list[i].rtime / 60; // input
+        my_match_lists.results.back().pep_seq = my_peptide_lists.d_list[i].pep_seq; //input 
+        my_match_lists.results.back().miss_cleaves = my_peptide_lists.d_list[i].miss_cleaves;
+      }
 
-					my_match_lists.results.push_back(my_markers()); //input 
-					/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl;*/
-					my_match_lists.results[c].spec_rt = mySpec.getRTime(); //input
-					/*cout << "-------------" << mySpec.getScanNumber() << "----------" << mySpec.size() << "----------" << endl;*/
-					my_match_lists.results[c].spec_sn = mySpec.getScanNumber(); //input
-					my_match_lists.results[c].spec_size = mySpec.size(); //input
-					/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;
-					cout << my_peptide_lists.d_list[i].rtime / 60 << "   " << my_peptide_lists.d_list[i].mz << endl;*/
-					my_match_lists.results[c].spec_mz = mySpec[z].mz; //input
-					my_match_lists.results[c].spec_intensity = mySpec[z].intensity; //input
-					my_match_lists.results[c].mzml_mz = my_peptide_lists.d_list[i].mz; //input   
-					my_match_lists.results[c].mzml_rt = my_peptide_lists.d_list[i].rtime / 60; // input
-					my_match_lists.results[c].pep_seq = my_peptide_lists.d_list[i].pep_seq; //input 
-					my_match_lists.results[c].miss_cleaves = my_peptide_lists.d_list[i].miss_cleaves;
-					b++;
-					c++;
-					/*cout << "NEXT MATCH" << "     " << b << "    " << my_match_lists.results.size() << endl;*/
-					continue;
-				}
-			}
-			/*if (z < (0.25 * mySpec.size()) + 0.5 && z >((0.25 * mySpec.size()) - 0.5)) {
-				cout << "25% done with pass 1" << "\n" << endl;
-			}
-			if (z < ((0.5 * mySpec.size()) + 0.5) && z >((0.5 * mySpec.size()) - 0.5)) {
-				
-			}
-			if (z < ((0.75 * mySpec.size()) + 0.5) && z >((0.75 * mySpec.size()) - 0.5)) {
-				cout << "75% done with pass 1" << "\n" << endl;
-			}*/
+      //MH: go to the next peptide
+      i++;
+    }
+    
+		//for (int z = 0; z < mySpec.size(); z++) {
+		//	/*cout << "-------------" << mySpec.getScanNumber() << "----------" << endl; */
+		//	/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;*/
+		//	for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
+		//		/*cout << my_peptide_lists.d_list[i].rtime / 60 << "      " << my_peptide_lists.d_list[i].d_pep_seq_rt / 60 << endl;*/
 
-		}
+		//		if (((my_peptide_lists.d_list[i].rtime / 60) <= mySpec.getRTime() + 2) && ((my_peptide_lists.d_list[i].rtime / 60) >= mySpec.getRTime() - 2) && (my_peptide_lists.d_list[i].mz <= mySpec[z].mz + 0.01) && (my_peptide_lists.d_list[i].mz >= mySpec[z].mz - 0.01)) {
+
+		//			my_match_lists.results.push_back(my_markers()); //input 
+		//			/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl;*/
+		//			my_match_lists.results[c].spec_rt = mySpec.getRTime(); //input
+		//			/*cout << "-------------" << mySpec.getScanNumber() << "----------" << mySpec.size() << "----------" << endl;*/
+		//			my_match_lists.results[c].spec_sn = mySpec.getScanNumber(); //input
+		//			my_match_lists.results[c].spec_size = mySpec.size(); //input
+		//			/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;
+		//			cout << my_peptide_lists.d_list[i].rtime / 60 << "   " << my_peptide_lists.d_list[i].mz << endl;*/
+		//			my_match_lists.results[c].spec_mz = mySpec[z].mz; //input
+		//			my_match_lists.results[c].spec_intensity = mySpec[z].intensity; //input
+		//			my_match_lists.results[c].mzml_mz = my_peptide_lists.d_list[i].mz; //input   
+		//			my_match_lists.results[c].mzml_rt = my_peptide_lists.d_list[i].rtime / 60; // input
+		//			my_match_lists.results[c].pep_seq = my_peptide_lists.d_list[i].pep_seq; //input 
+		//			my_match_lists.results[c].miss_cleaves = my_peptide_lists.d_list[i].miss_cleaves;
+		//			b++;
+		//			c++;
+		//			/*cout << "NEXT MATCH" << "     " << b << "    " << my_match_lists.results.size() << endl;*/
+		//			continue;
+		//		}
+		//	}
+		//	/*if (z < (0.25 * mySpec.size()) + 0.5 && z >((0.25 * mySpec.size()) - 0.5)) {
+		//		cout << "25% done with pass 1" << "\n" << endl;
+		//	}
+		//	if (z < ((0.5 * mySpec.size()) + 0.5) && z >((0.5 * mySpec.size()) - 0.5)) {
+		//		
+		//	}
+		//	if (z < ((0.75 * mySpec.size()) + 0.5) && z >((0.75 * mySpec.size()) - 0.5)) {
+		//		cout << "75% done with pass 1" << "\n" << endl;
+		//	}*/
+
+		//}
 
 		/*if (mySpec.getRTime() < 75.01 && mySpec.getRTime() > 74.99) {
 			cout << "50% done with pass 1" << "\n" << endl;
@@ -87,96 +108,172 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 
 
 	cout << "pass 1 done" << "\n" << endl;
+  
+  cout << my_match_lists.results.size() << endl;
+
+  //MH: When deleting duplicates, it helps to sort so that duplicates are next to each other
+  //Then you need to make only a single pass. Furthermore, don't use erase, simply copy
+  //the information you want to keep to a temporary vector, then copy it back to your
+  //desired vector
+  sort(my_match_lists.results.begin(), my_match_lists.results.end(),compareSeqScan);
+  vector<my_markers> tmp;
+  tmp.push_back(my_match_lists.results[0]); //First entry is always novel
+  for(size_t i=1;i<my_match_lists.results.size();i++){
+    //skip duplicates
+    if( (my_match_lists.results[i].pep_seq == my_match_lists.results[i-1].pep_seq) && (my_match_lists.results[i].spec_sn == my_match_lists.results[i-1].spec_sn)) continue;
+    //keep novel entries
+    tmp.push_back(my_match_lists.results[i]);
+  }
+  my_match_lists.results=tmp; //copy the vector back
 
 
-	MSReader myfile1;
-	Spectrum mySpec1;
-
-	myfile1.setFilter(MS1);
-	myfile1.readFile(my_params.mzml.c_str(), mySpec1);
-
-
-	int k = 0;
-	int l = 0;
-	while (mySpec1.getRTime() != 0) {
-
-		/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl; */
-
-		for (int z = 0; z < mySpec1.size(); z++) {
-			/*cout << "-------------" << mySpec.getScanNumber() << "----------" << endl; */
-			/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;*/
-			for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
-				/*cout << my_peptide_lists.d_list[i].rtime / 60 << "      " << my_peptide_lists.d_list[i].d_pep_seq_rt / 60 << endl;*/
+  //// DELETE DUPLICATES (DD)
+  //for (int i = 0; i < my_match_lists.results.size() - 1; i++) {
+  //  for (int j = i + 1; j < my_match_lists.results.size(); j++) {
+  //    if ((my_match_lists.results[i].pep_seq == my_match_lists.results[j].pep_seq) && (my_match_lists.results[i].spec_sn == my_match_lists.results[j].spec_sn)) {
+  //      my_match_lists.results.erase(my_match_lists.results.begin() + j);
+  //      j = (i + 1) - 1; //MH: you know this means j=i, right?
+  //    }
+  //  }
+  //}
+  cout << my_match_lists.results.size() << endl;
 
 
-				if (((my_peptide_lists.d_list[i].d_pep_seq_rt / 60) <= mySpec1.getRTime() + 2) && ((my_peptide_lists.d_list[i].d_pep_seq_rt / 60) >= mySpec1.getRTime() - 2) && (my_peptide_lists.d_list[i].d_pep_seq_mz <= mySpec1[z].mz + 0.01) && (my_peptide_lists.d_list[i].d_pep_seq_mz >= mySpec1[z].mz - 0.01)) {
+  //MH: Now resort the list for d_pep
+  sort(my_peptide_lists.d_list.begin(), my_peptide_lists.d_list.end(), compareRTimeD);
+  pepIndex = 0; // reset our index
 
-					my_match_lists.results1.push_back(my_markers()); //input 
-					/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl;*/
-					my_match_lists.results1[l].spec_rt = mySpec1.getRTime(); //input
-					/*cout << "-------------" << mySpec.getScanNumber() << "----------" << mySpec.size() << "----------" << endl;*/
-					my_match_lists.results1[l].spec_sn = mySpec1.getScanNumber(); //input
-					my_match_lists.results1[l].spec_size = mySpec1.size(); //input
-					/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;
-					cout << my_peptide_lists.d_list[i].rtime / 60 << "   " << my_peptide_lists.d_list[i].mz << endl;*/
-					my_match_lists.results1[l].spec_mz = mySpec1[z].mz; //input
-					my_match_lists.results1[l].spec_intensity = mySpec1[z].intensity; //input
-					my_match_lists.results1[l].mzml_mz = my_peptide_lists.d_list[i].d_pep_seq_mz; //input
-					my_match_lists.results1[l].mzml_rt = my_peptide_lists.d_list[i].d_pep_seq_rt / 60; //input
-					my_match_lists.results1[l].pep_seq = my_peptide_lists.d_list[i].d_pep_seq; //input 
-					my_match_lists.results1[l].miss_cleaves = my_peptide_lists.d_list[i].d_miss_cleaves;
-					k++;
-					l++;
-					/*cout << "NEXT MATCH" << "     " << b << "    " << my_match_lists.results.size() << endl;*/
-					continue;
-				}
+  //MH: Restart reading our mzML file. Note, this could all be done in one pass, instead of two.
+  myfile.readFile(my_params.mzml.c_str(), mySpec);
+  while (mySpec.getRTime() != 0) {
 
-			}
-			/*if (z < (0.25 * mySpec1.size()) + 0.5 && z > ((0.25 * mySpec1.size()) - 0.5)) {
-				cout << "25% done with pass 1" << "\n" << endl;
-			}
-			if (z < ((0.5 * mySpec1.size()) + 0.5) && z > ((0.5 * mySpec1.size()) - 0.5)) {
-				cout << "50% done with pass 1" << "\n" << endl;
-			}
-			if (z < ((0.75 * mySpec1.size()) + 0.5) && z > ((0.75 * mySpec1.size()) - 0.5)) {
-				cout << "75% done with pass 1" << "\n" << endl;
-			}*/
+    size_t i = pepIndex;
+    while (i < my_peptide_lists.d_list.size() && (my_peptide_lists.d_list[i].d_pep_seq_rt / 60) < (mySpec.getRTime() - 2)) i++;
+    if (i == my_peptide_lists.d_list.size()) break; //if we've checked every peptide, stop now.
+    pepIndex = i; //mark our new start point for the next iteration
 
-		}
+    while (i < my_peptide_lists.d_list.size() && (my_peptide_lists.d_list[i].d_pep_seq_rt / 60) < (mySpec.getRTime() + 2)) {
+      int ret = findPeakMZ(mySpec, my_peptide_lists.d_list[i].d_pep_seq_mz, 0.01);
+      if (ret > -1) {
+        my_match_lists.results1.push_back(my_markers()); //input 
+        my_match_lists.results1.back().spec_rt = mySpec.getRTime(); //input
+        my_match_lists.results1.back().spec_sn = mySpec.getScanNumber(); //input
+        my_match_lists.results1.back().spec_size = mySpec.size(); //input
+        my_match_lists.results1.back().spec_mz = mySpec[ret].mz; //input
+        my_match_lists.results1.back().spec_intensity = mySpec[ret].intensity; //input
+        my_match_lists.results1.back().mzml_mz = my_peptide_lists.d_list[i].d_pep_seq_mz; //input   
+        my_match_lists.results1.back().mzml_rt = my_peptide_lists.d_list[i].d_pep_seq_rt / 60; // input
+        my_match_lists.results1.back().pep_seq = my_peptide_lists.d_list[i].d_pep_seq; //input 
+        my_match_lists.results1.back().miss_cleaves = my_peptide_lists.d_list[i].d_miss_cleaves;
+      }
+      i++;//MH: go to the next peptide
+    }
+    myfile.readFile(NULL, mySpec);
+  }
 
-		/*if (mySpec1.getRTime() < 75.01 && mySpec1.getRTime() > 74.99) {
-			cout << "50% done with pass 2" << "\n" << endl;
-		}*/
-		myfile1.readFile(NULL, mySpec1);
-	}
+  cout << my_match_lists.results1.size() << endl;
+
+  //MH: Delete duplicates again.
+  sort(my_match_lists.results1.begin(), my_match_lists.results1.end(), compareSeqScan);
+  tmp.clear(); //clear our old tmp vector
+  tmp.push_back(my_match_lists.results1[0]);
+  for (size_t i = 1; i < my_match_lists.results1.size(); i++) {
+    if ((my_match_lists.results1[i].pep_seq == my_match_lists.results1[i - 1].pep_seq) && (my_match_lists.results1[i].spec_sn == my_match_lists.results1[i - 1].spec_sn)) continue;
+    tmp.push_back(my_match_lists.results1[i]);
+  }
+  my_match_lists.results1 = tmp;
+
+  cout << my_match_lists.results1.size() << endl;
+
+
+	//MSReader myfile1;
+	//Spectrum mySpec1;
+
+	//myfile1.setFilter(MS1);
+	//myfile1.readFile(my_params.mzml.c_str(), mySpec1);
+
+
+	//int k = 0;
+	//int l = 0;
+	//while (mySpec1.getRTime() != 0) {
+
+	//	/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl; */
+
+	//	for (int z = 0; z < mySpec1.size(); z++) {
+	//		/*cout << "-------------" << mySpec.getScanNumber() << "----------" << endl; */
+	//		/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;*/
+	//		for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
+	//			/*cout << my_peptide_lists.d_list[i].rtime / 60 << "      " << my_peptide_lists.d_list[i].d_pep_seq_rt / 60 << endl;*/
+
+
+	//			if (((my_peptide_lists.d_list[i].d_pep_seq_rt / 60) <= mySpec1.getRTime() + 2) && ((my_peptide_lists.d_list[i].d_pep_seq_rt / 60) >= mySpec1.getRTime() - 2) && (my_peptide_lists.d_list[i].d_pep_seq_mz <= mySpec1[z].mz + 0.01) && (my_peptide_lists.d_list[i].d_pep_seq_mz >= mySpec1[z].mz - 0.01)) {
+
+	//				my_match_lists.results1.push_back(my_markers()); //input 
+	//				/*cout << "-------------" << mySpec.getRTime() << "-------------" << endl;*/
+	//				my_match_lists.results1[l].spec_rt = mySpec1.getRTime(); //input
+	//				/*cout << "-------------" << mySpec.getScanNumber() << "----------" << mySpec.size() << "----------" << endl;*/
+	//				my_match_lists.results1[l].spec_sn = mySpec1.getScanNumber(); //input
+	//				my_match_lists.results1[l].spec_size = mySpec1.size(); //input
+	//				/*cout << mySpec[z].mz << "\t" << mySpec[z].intensity << endl;
+	//				cout << my_peptide_lists.d_list[i].rtime / 60 << "   " << my_peptide_lists.d_list[i].mz << endl;*/
+	//				my_match_lists.results1[l].spec_mz = mySpec1[z].mz; //input
+	//				my_match_lists.results1[l].spec_intensity = mySpec1[z].intensity; //input
+	//				my_match_lists.results1[l].mzml_mz = my_peptide_lists.d_list[i].d_pep_seq_mz; //input
+	//				my_match_lists.results1[l].mzml_rt = my_peptide_lists.d_list[i].d_pep_seq_rt / 60; //input
+	//				my_match_lists.results1[l].pep_seq = my_peptide_lists.d_list[i].d_pep_seq; //input 
+	//				my_match_lists.results1[l].miss_cleaves = my_peptide_lists.d_list[i].d_miss_cleaves;
+	//				k++;
+	//				l++;
+	//				/*cout << "NEXT MATCH" << "     " << b << "    " << my_match_lists.results.size() << endl;*/
+	//				continue;
+	//			}
+
+	//		}
+	//		/*if (z < (0.25 * mySpec1.size()) + 0.5 && z > ((0.25 * mySpec1.size()) - 0.5)) {
+	//			cout << "25% done with pass 1" << "\n" << endl;
+	//		}
+	//		if (z < ((0.5 * mySpec1.size()) + 0.5) && z > ((0.5 * mySpec1.size()) - 0.5)) {
+	//			cout << "50% done with pass 1" << "\n" << endl;
+	//		}
+	//		if (z < ((0.75 * mySpec1.size()) + 0.5) && z > ((0.75 * mySpec1.size()) - 0.5)) {
+	//			cout << "75% done with pass 1" << "\n" << endl;
+	//		}*/
+
+	//	}
+
+	//	/*if (mySpec1.getRTime() < 75.01 && mySpec1.getRTime() > 74.99) {
+	//		cout << "50% done with pass 2" << "\n" << endl;
+	//	}*/
+	//	myfile1.readFile(NULL, mySpec1);
+	//}
 
 
 	// END MZML FUNCTION
 
-	cout << "pass 2 done" << "\n" << endl; 
-	cout << my_match_lists.results.size() << endl;
+	//cout << "pass 2 done" << "\n" << endl; 
+	//cout << my_match_lists.results.size() << endl;
 
-	// DELETE DUPLICATES (DD)
-	for (int i = 0; i < my_match_lists.results.size() - 1; i++) {
-		for (int j = i + 1; j < my_match_lists.results.size(); j++) {
-			if ((my_match_lists.results[i].pep_seq == my_match_lists.results[j].pep_seq) && (my_match_lists.results[i].spec_sn == my_match_lists.results[j].spec_sn)) {
-				my_match_lists.results.erase(my_match_lists.results.begin() + j);
-				j = (i + 1) - 1;
-			}
-		}
-	}
-	cout << my_match_lists.results.size() << endl; 
-	cout << my_match_lists.results1.size() << endl;
+	//// DELETE DUPLICATES (DD)
+	//for (int i = 0; i < my_match_lists.results.size() - 1; i++) {
+	//	for (int j = i + 1; j < my_match_lists.results.size(); j++) {
+	//		if ((my_match_lists.results[i].pep_seq == my_match_lists.results[j].pep_seq) && (my_match_lists.results[i].spec_sn == my_match_lists.results[j].spec_sn)) {
+	//			my_match_lists.results.erase(my_match_lists.results.begin() + j);
+	//			j = (i + 1) - 1;
+	//		}
+	//	}
+	//}
+	//cout << my_match_lists.results.size() << endl; 
+	//cout << my_match_lists.results1.size() << endl;
 
-	for (int i = 0; i < my_match_lists.results1.size() - 1; i++) {
-		for (int j = i + 1; j < my_match_lists.results1.size(); j++) {
-			if ((my_match_lists.results1[i].pep_seq == my_match_lists.results1[j].pep_seq) && (my_match_lists.results1[i].spec_sn == my_match_lists.results1[j].spec_sn)) {
-				my_match_lists.results1.erase(my_match_lists.results1.begin() + j);
-				j = (i + 1) - 1;
-			}
-		}
-	}
-	cout << my_match_lists.results1.size() << endl;
+	//for (int i = 0; i < my_match_lists.results1.size() - 1; i++) {
+	//	for (int j = i + 1; j < my_match_lists.results1.size(); j++) {
+	//		if ((my_match_lists.results1[i].pep_seq == my_match_lists.results1[j].pep_seq) && (my_match_lists.results1[i].spec_sn == my_match_lists.results1[j].spec_sn)) {
+	//			my_match_lists.results1.erase(my_match_lists.results1.begin() + j);
+	//			j = (i + 1) - 1;
+	//		}
+	//	}
+	//}
+	//cout << my_match_lists.results1.size() << endl;
 
 	// END DD FUNCTION
 
@@ -185,6 +282,53 @@ match_lists deep_functions::mzml(peptide_lists& my_peptide_lists, my_parameters&
 
 }
 
+//MH: Function to binary search for an mz value within a specific tolerance
+int scan_reader::findPeakMZ(MSToolkit::Spectrum& spec, double mz, double tol){
+  int sz = spec.size();
+  int lower = 0;
+  int mid = sz / 2;
+  int upper = sz;
+
+  //our boundaries
+  double LB=mz-tol;
+  double UB=mz+tol;
+
+  //stop now if the spectrum is empty.
+  if(sz<1) return -1;
+
+  while(lower<upper){
+    if(spec[mid].mz>UB){ //too high
+      //if(mid==0) break;
+      upper = mid - 1;
+      mid = (lower + upper) / 2;
+    } else if(spec[mid].mz<LB) { //too low
+      lower = mid + 1;
+      mid = (lower + upper) / 2;
+      //if(mid==sz) break;
+    } else { //we have a match, now we must step left and right to make sure it's the max
+      float max=spec[mid].intensity;
+      int maxI=mid;
+      int i=mid;
+      while(i>0 && spec[i].mz>LB){
+        i--;
+        if(spec[i].intensity>max){
+          max=spec[i].intensity;
+          maxI=i;
+        }
+      }
+      i=mid;
+      while(i<sz-1 && spec[i].mz<UB){
+        i++;
+        if (spec[i].intensity > max) {
+          max = spec[i].intensity;
+          maxI = i;
+        }
+      }
+      return maxI; 
+    }
+  }
+  return -1; //-1 means can't find peak;
+}
 
 
 
@@ -199,59 +343,94 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 	//cout << "print done" << endl; 
 
 	//ORDER PEPTIDES AND PUT INTO VECOTR OF VECTORS (VV)
-	int q = 0;
-	for (int i = 0; i < my_match_lists.results.size() - 1; i++) {
-		my_peptide_lists.spectra.push_back(my_intensities());
-		my_peptide_lists.spectra[q].x = my_match_lists.results[i].spec_rt;
-		my_peptide_lists.spectra[q].y = my_match_lists.results[i].spec_intensity;
-		my_peptide_lists.spectra[q].seq = my_match_lists.results[i].pep_seq;
-		my_peptide_lists.spectra[q].mc = my_match_lists.results[i].miss_cleaves;
-		q++;
-		for (int j = i + 1; j < my_match_lists.results.size(); j++) {
-			if (my_match_lists.results[i].pep_seq == my_match_lists.results[j].pep_seq) {
-				my_peptide_lists.spectra.push_back(my_intensities());
-				my_peptide_lists.spectra[q].x = my_match_lists.results[j].spec_rt;
-				my_peptide_lists.spectra[q].y = my_match_lists.results[j].spec_intensity;
-				my_peptide_lists.spectra[q].seq = my_match_lists.results[i].pep_seq;
-				my_peptide_lists.spectra[q].mc = my_match_lists.results[i].miss_cleaves;
-				q++;
-				my_match_lists.results.erase(my_match_lists.results.begin() + j);
-				j = (i + 1) - 1;
-			}
-		}
-		/*q++;*/
-	}
+	//int q = 0;
+	//for (int i = 0; i < my_match_lists.results.size() - 1; i++) {
+	//	my_peptide_lists.spectra.push_back(my_intensities());
+	//	my_peptide_lists.spectra[q].x = my_match_lists.results[i].spec_rt;
+	//	my_peptide_lists.spectra[q].y = my_match_lists.results[i].spec_intensity;
+	//	my_peptide_lists.spectra[q].seq = my_match_lists.results[i].pep_seq;
+	//	my_peptide_lists.spectra[q].mc = my_match_lists.results[i].miss_cleaves;
+	//	q++;
+	//	for (int j = i + 1; j < my_match_lists.results.size(); j++) {
+	//		if (my_match_lists.results[i].pep_seq == my_match_lists.results[j].pep_seq) {
+	//			my_peptide_lists.spectra.push_back(my_intensities());
+	//			my_peptide_lists.spectra[q].x = my_match_lists.results[j].spec_rt;
+	//			my_peptide_lists.spectra[q].y = my_match_lists.results[j].spec_intensity;
+	//			my_peptide_lists.spectra[q].seq = my_match_lists.results[i].pep_seq;
+	//			my_peptide_lists.spectra[q].mc = my_match_lists.results[i].miss_cleaves;
+	//			q++;
+	//			my_match_lists.results.erase(my_match_lists.results.begin() + j);
+	//			j = (i + 1) - 1;
+	//		}
+	//	}
+	//	/*q++;*/
+	//}
 
-
-
-	int num = 0;
-	for (int i = 0; i < my_match_lists.results1.size() - 1; i++) {
-		my_peptide_lists.spectra1.push_back(my_intensities());
-		my_peptide_lists.spectra1[num].x = my_match_lists.results1[i].spec_rt;
-		my_peptide_lists.spectra1[num].y = my_match_lists.results1[i].spec_intensity;
-		my_peptide_lists.spectra1[num].seq = my_match_lists.results1[i].pep_seq;
-		my_peptide_lists.spectra1[num].mc = my_match_lists.results1[i].miss_cleaves;
-		num++;
-		for (int j = i + 1; j < my_match_lists.results1.size(); j++) {
-			if (my_match_lists.results1[i].pep_seq == my_match_lists.results1[j].pep_seq) {
-				my_peptide_lists.spectra1.push_back(my_intensities());
-				my_peptide_lists.spectra1[num].x = my_match_lists.results1[j].spec_rt;
-				my_peptide_lists.spectra1[num].y = my_match_lists.results1[j].spec_intensity;
-				my_peptide_lists.spectra1[num].seq = my_match_lists.results1[i].pep_seq;
-				my_peptide_lists.spectra1[num].mc = my_match_lists.results1[i].miss_cleaves;
-				num++;
-				my_match_lists.results1.erase(my_match_lists.results1.begin() + j);
-				j = (i + 1) - 1;
-			}
-		}
-		/*q++;*/
-	}
+	//int num = 0;
+	//for (int i = 0; i < my_match_lists.results1.size() - 1; i++) {
+	//	my_peptide_lists.spectra1.push_back(my_intensities());
+	//	my_peptide_lists.spectra1[num].x = my_match_lists.results1[i].spec_rt;
+	//	my_peptide_lists.spectra1[num].y = my_match_lists.results1[i].spec_intensity;
+	//	my_peptide_lists.spectra1[num].seq = my_match_lists.results1[i].pep_seq;
+	//	my_peptide_lists.spectra1[num].mc = my_match_lists.results1[i].miss_cleaves;
+	//	num++;
+	//	for (int j = i + 1; j < my_match_lists.results1.size(); j++) {
+	//		if (my_match_lists.results1[i].pep_seq == my_match_lists.results1[j].pep_seq) {
+	//			my_peptide_lists.spectra1.push_back(my_intensities());
+	//			my_peptide_lists.spectra1[num].x = my_match_lists.results1[j].spec_rt;
+	//			my_peptide_lists.spectra1[num].y = my_match_lists.results1[j].spec_intensity;
+	//			my_peptide_lists.spectra1[num].seq = my_match_lists.results1[i].pep_seq;
+	//			my_peptide_lists.spectra1[num].mc = my_match_lists.results1[i].miss_cleaves;
+	//			num++;
+	//			my_match_lists.results1.erase(my_match_lists.results1.begin() + j);
+	//			j = (i + 1) - 1;
+	//		}
+	//	}
+	//	/*q++;*/
+	//}
 
 	
 
 	vector<my_intensities> qc;
 
-	int inc = 0;
+  //MH: Again, sorting is your friend here. Although these vectors are already sorted, so we won't do that.
+  //But because they are sorted, you can get through in a single pass. And you won't need to erase
+  //which will save tons of time.
+  for (size_t i = 0; i < my_match_lists.results.size(); i++) {
+    my_peptide_lists.spectra.push_back(my_intensities()); //add first one
+    my_peptide_lists.spectra.back().x = my_match_lists.results[i].spec_rt;
+    my_peptide_lists.spectra.back().y = my_match_lists.results[i].spec_intensity;
+    my_peptide_lists.spectra.back().seq = my_match_lists.results[i].pep_seq;
+    my_peptide_lists.spectra.back().mc = my_match_lists.results[i].miss_cleaves;
+  }
+  my_peptide_lists.master.push_back(qc);
+  my_peptide_lists.master.back().push_back(my_peptide_lists.spectra[0]);
+  for(size_t i=1;i<my_peptide_lists.spectra.size();i++){
+    if (my_peptide_lists.spectra[i].seq != my_peptide_lists.spectra[i-1].seq) {
+      my_peptide_lists.master.push_back(qc);
+    }
+    my_peptide_lists.master.back().push_back(my_peptide_lists.spectra[i]);
+  }
+
+  //MH: Repeat for the other list
+  for (size_t i = 0; i < my_match_lists.results1.size(); i++) {
+    my_peptide_lists.spectra1.push_back(my_intensities()); //add first one
+    my_peptide_lists.spectra1.back().x = my_match_lists.results1[i].spec_rt;
+    my_peptide_lists.spectra1.back().y = my_match_lists.results1[i].spec_intensity;
+    my_peptide_lists.spectra1.back().seq = my_match_lists.results1[i].pep_seq;
+    my_peptide_lists.spectra1.back().mc = my_match_lists.results1[i].miss_cleaves;
+  }
+  my_peptide_lists.master1.push_back(qc);
+  my_peptide_lists.master1.back().push_back(my_peptide_lists.spectra1[0]);
+  for (size_t i = 1; i < my_peptide_lists.spectra1.size(); i++) {
+    if (my_peptide_lists.spectra1[i].seq != my_peptide_lists.spectra1[i - 1].seq) {
+      my_peptide_lists.master1.push_back(qc);
+    }
+    my_peptide_lists.master1.back().push_back(my_peptide_lists.spectra1[i]);
+  }
+
+
+	/*int inc = 0;
 	for (int i = 0; i < my_peptide_lists.spectra.size() - 1; i++) {
 		my_peptide_lists.master.push_back(qc);
 		my_peptide_lists.master[inc].push_back(my_peptide_lists.spectra[i]);
@@ -281,7 +460,7 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 			}
 		}
 		inc1++;
-	}
+	}*/
 
 
 	cout << "vector querry done" << "\n" << endl; 
@@ -460,7 +639,7 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 		for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
 			total.push_back(my_peptide_lists.master[i][j].tot);
 		}
-		float a = accumulate(total.begin(), total.end(), 0);
+		int a = accumulate(total.begin(), total.end(), 0);
 		my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].tot = a; 
 		a = 0; 
 		total.clear(); 

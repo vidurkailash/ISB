@@ -58,7 +58,7 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
 							my_peptide_lists.all[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
 							my_peptide_lists.all[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
 							my_peptide_lists.all[c].mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
-							my_peptide_lists.all[c].rtime = atof(sample_node->first_attribute("retention_time_sec")->value());
+							my_peptide_lists.all[c].rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
 							my_peptide_lists.all[c].prev_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value());
 							my_peptide_lists.all[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
 							c++;
@@ -79,7 +79,7 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
 					my_peptide_lists.all[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
 					my_peptide_lists.all[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
 					my_peptide_lists.all[c].mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
-					my_peptide_lists.all[c].rtime = atof(sample_node->first_attribute("retention_time_sec")->value());
+					my_peptide_lists.all[c].rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
 					my_peptide_lists.all[c].prev_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value());
 					my_peptide_lists.all[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
 					c++;
@@ -213,12 +213,12 @@ peptide_lists deep_functions::lcd(peptide_lists& my_peptide_lists) {
 				my_peptide_lists.miss_unique[i].d_miss_cleaves = my_peptide_lists.tryp_unique[j].miss_cleaves;
 				if (found == 0) {
 					my_peptide_lists.miss_unique[i].cleave_loc = 'R';
-					my_peptide_lists.miss_unique[i].cleave_pos = found;
+					my_peptide_lists.miss_unique[i].cleave_pos = (int)found;
 
 				}
 				else {
 					my_peptide_lists.miss_unique[i].cleave_loc = 'L';
-					my_peptide_lists.miss_unique[i].cleave_pos = found;
+					my_peptide_lists.miss_unique[i].cleave_pos = (int)found;
 
 				}
 				my_peptide_lists.miss_unique[i].d_pep_seq_mass = my_peptide_lists.tryp_unique[j].mass;
@@ -290,8 +290,8 @@ metrics deep_functions::calc(peptide_lists& my_peptide_lists, metrics& my_metric
 	vector<int> number;
 	vector<int> miss_pep;
 	double h = 0;
-	for (int i = 0; i < my_peptide_lists.tryp_unique.size(); i++) {
-		number.push_back(my_peptide_lists.tryp_unique[i].pep_seq.size());
+	for (size_t i = 0; i < my_peptide_lists.tryp_unique.size(); i++) {
+		number.push_back((int)my_peptide_lists.tryp_unique[i].pep_seq.size());
 		miss_pep.push_back(my_peptide_lists.tryp_unique[i].miss_cleaves);
 		if (my_peptide_lists.tryp_unique[i].miss_cleaves > 0) {
 			h++;
@@ -309,9 +309,9 @@ metrics deep_functions::calc(peptide_lists& my_peptide_lists, metrics& my_metric
 	my_metrics.unique_pep_charge = my_peptide_lists.tryp_unique_z.size();
 	my_metrics.unique_peptides = my_peptide_lists.tryp_unique.size();
 	my_metrics.avg_pep_length = f / my_metrics.unique_peptides;
-	my_metrics.tryp_frac = my_metrics.tryptic_num / my_metrics.psm_num;
-	my_metrics.nontryp_frac = my_metrics.nontryptic_num / my_metrics.psm_num;
-	my_metrics.pep_frac = my_peptide_lists.tryp_unique.size() / my_metrics.psm_num;
+	my_metrics.tryp_frac = (double)my_metrics.tryptic_num / my_metrics.psm_num;
+	my_metrics.nontryp_frac = (double)my_metrics.nontryptic_num / my_metrics.psm_num;
+	my_metrics.pep_frac = (double)my_peptide_lists.tryp_unique.size() / my_metrics.psm_num;
 	my_metrics.miss_cleave_rate_psm = r / my_metrics.tryptic_num;
 	my_metrics.miss_cleave_rate_pep = g / my_metrics.unique_peptides;
 	my_metrics.num_miss_cleave_pep = h; 

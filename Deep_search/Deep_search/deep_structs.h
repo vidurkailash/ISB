@@ -20,8 +20,8 @@ typedef struct features {
 	std::string pep_seq;
 	int charge;
 	float rtime;
-	float mass; 
-	float mz; 
+	double mass; 
+	double mz; 
 	int miss_cleaves;
 	std::string prev_aa;
 	std::string next_aa;
@@ -29,8 +29,8 @@ typedef struct features {
 	std::string d_pep_seq;
 	int d_pep_seq_charge;
 	float d_pep_seq_rt;
-	float d_pep_seq_mass;
-	float d_pep_seq_mz; 
+	double d_pep_seq_mass;
+	double d_pep_seq_mz; 
 	int d_miss_cleaves;
 	char cleave_loc;
 	int cleave_pos; 
@@ -76,9 +76,9 @@ typedef struct markers {
 	float spec_rt;
 	int spec_sn;
 	int spec_size; 
-	float spec_mz; 
+	double spec_mz; 
 	float mzml_rt;
-	float mzml_mz;
+	double mzml_mz;
 	float spec_intensity;
 	std::string pep_seq; 
 	int miss_cleaves; 
@@ -90,12 +90,12 @@ typedef struct markers {
 
 typedef struct metrics {
 
-	double total_psm; //check
-	double psm_num; //check
-	double tryptic_num; //check
-	double nontryptic_num; //check
-	double unique_pep_charge; //check
-	double unique_peptides; //check
+	size_t total_psm; //check
+	size_t psm_num; //check
+	size_t tryptic_num; //check
+	size_t nontryptic_num; //check
+	size_t unique_pep_charge; //check
+	size_t unique_peptides; //check
 	double avg_pep_length; //check
 	double tryp_frac; //check
 	double nontryp_frac; //check
@@ -109,7 +109,7 @@ typedef struct metrics {
 	double num_tot_miss_cleave_psm; 
 	double golden_stat_psm;
 	double golden_stat_unique_pep; 
-	double find_num;
+	size_t find_num;
 	double miss_avg_high; 
 	double tryp_avg_high;
 	int twice_mc; 

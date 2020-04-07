@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include "deep_class.h"
+#include "scan_reader.h"
 #include <algorithm>
 #include <list>
 #include <iterator>
@@ -152,8 +153,13 @@ void warnings(my_parameters& my_params) {
 int main(int argc, char* argv[])
 {
 
+  //TODO: Add usage statement
+  if(argc==1){
+  }
+
 
 	deep_functions my_deep_functions;
+  scan_reader sr;
 
 	my_parameters my_params;
 	my_params = cmd_input(argc, argv);
@@ -173,7 +179,7 @@ int main(int argc, char* argv[])
 	my_peptide_lists = my_deep_functions.new_list(my_peptide_lists); 
 
 	cout << "matches found... next step (it's a big one)" << "\n" << endl; 
-	my_match_lists = my_deep_functions.mzml(my_peptide_lists, my_params);
+	my_match_lists = sr.mzml(my_peptide_lists, my_params);
 	cout << "mzml file cross checked... next step " << "\n" << endl; 
 
 	my_peptide_lists = my_deep_functions.reader(my_peptide_lists, my_metrics, my_match_lists);
