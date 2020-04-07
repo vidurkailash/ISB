@@ -45,7 +45,7 @@ public:
 	peptide_lists new_list(peptide_lists& my_peptide_lists); 
 	metrics calc1(peptide_lists& my_peptide_lists, metrics& my_metircs, my_parameters& my_params);
 
-};
+}; 
 
 
 #endif

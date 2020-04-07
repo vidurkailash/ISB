@@ -9,7 +9,7 @@
 class scan_reader {
 public:
   match_lists mzml(peptide_lists& my_peptide_lists, my_parameters& my_params);
-
+   
 private:
 
   //MH: Binary search function. Could and should be overloaded for PPM instead of MZ tolerance
