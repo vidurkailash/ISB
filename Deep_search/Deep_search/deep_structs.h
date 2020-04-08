@@ -14,7 +14,13 @@ typedef struct parameters {
 
 } my_parameters;
 
-
+//MH: Good rules to know about data types. 
+//1. When you need discrete values, use int (i.e. charge states)
+//2. When you store array indexes, use size_t (non-negative, scales with architecture)
+//3. When storing m/z values, use double to have maximum precision with your decimal places
+//   This is very important when working with parts-per-million and parts-per-billion precisions.
+//4. When decimal place precision isn't so important (i.e. retention time, peak intensity) then use float.
+//   Or if you are not sure, don't use float and just use double.
 typedef struct features {
 
 	std::string pep_seq;
@@ -63,16 +69,15 @@ typedef struct compare {
 
 } my_compare;
 
-
-typedef struct results {
-	float miss_tot;
-	float tryp_tot; 
-
-} my_results;
+//MH: commenting this out as it seems to be kruft.
+//typedef struct results {
+//	float miss_tot;
+//	float tryp_tot; 
+//
+//} my_results;
 
 typedef struct markers {
 
-	
 	float spec_rt;
 	int spec_sn;
 	int spec_size; 
@@ -82,8 +87,6 @@ typedef struct markers {
 	float spec_intensity;
 	std::string pep_seq; 
 	int miss_cleaves; 
-
-
 
 } my_markers; 
 

@@ -102,7 +102,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 
 void warnings(my_parameters& my_params) {
 
-	deep_functions my_deep_functions; 
+	//deep_functions my_deep_functions; 
 
 	if (my_params.filename.end()[-1] != 'l') {
 		cout << "filename is incorrect or not found" << endl;

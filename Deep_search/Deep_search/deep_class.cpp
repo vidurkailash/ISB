@@ -1,22 +1,8 @@
-#include <string.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <vector>
 #include "rapidxml.hpp"
-#include <map> 
-#include <algorithm>
-#include <list>
-#include <iterator>
-#include <cstdio>
-#include<numeric>
 #include "deep_class.h"
-
-
 
 using namespace rapidxml;
 using namespace std;
- 
 
 peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
 	xml_document<> doc;
@@ -325,4 +311,23 @@ metrics deep_functions::calc(peptide_lists& my_peptide_lists, metrics& my_metric
 
 	return my_metrics;
 
+}
+
+//MH: This function replicates computing (and storing) the area between every two points.
+// It then returns the sum of the area of the peak. Note that the boundaries are assumed
+// to be the first and last points in the array.
+float deep_functions::calcPeakArea(std::vector<my_intensities>& v){
+  float w;
+  float hRect;
+  float hTri;
+  float total=0;
+  for (size_t i = 0; i < v.size()-1; i++) {
+    w = v[i + 1].x - v[i].x;
+    hTri = abs(v[i + 1].y - v[i].y);
+    if (v[i + 1].y < v[i].y) hRect = v[i + 1].y;
+    else hRect = v[i].y;
+    v[i].tot = w * hRect + w * hTri / 2;
+    total+=v[i].tot;
+  }
+  return total;
 }
