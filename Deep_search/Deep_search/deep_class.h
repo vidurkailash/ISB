@@ -2,6 +2,9 @@
 #define deep_class_h
 
 #include "deep_structs.h"
+#include <fstream>
+#include <iostream>
+#include<numeric>
 #include <vector> 
 
 class peptide_lists {
@@ -44,6 +47,8 @@ public:
 	peptide_lists lcd(peptide_lists& my_peptide_lists); 
 	peptide_lists new_list(peptide_lists& my_peptide_lists); 
 	metrics calc1(peptide_lists& my_peptide_lists, metrics& my_metircs, my_parameters& my_params);
+
+  float calcPeakArea(std::vector<my_intensities>& v);
 
 }; 
 

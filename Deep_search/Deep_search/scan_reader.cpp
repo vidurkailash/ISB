@@ -584,11 +584,16 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 	float sumi1 = sum1 / peak3.size();
 	my_metrics.tryp_avg_high = sumi1; 
 
-	
-	
-
-
-
+	//MH: Calculating area is something performed on multiple arrays. So create a function
+  // that does it on any array you pass to it. Also, have it return the total rather than
+  // iterate the array again to count the total.
+  for(size_t i=0;i<my_peptide_lists.master.size();i++){
+    my_peptide_lists.master[i].back().tot=calcPeakArea(my_peptide_lists.master[i]);
+  }
+  for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
+    my_peptide_lists.master1[i].back().tot = calcPeakArea(my_peptide_lists.master1[i]);
+  }
+  /*
 	//INTEGRATE INTENSITY FUNCTION (AREA)
 	float u = 0;
 	float v = 0;
@@ -609,8 +614,9 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 		}
 		
 	}
+  */
 
-	float u1 = 0;
+	/*float u1 = 0;
 	float v1 = 0;
 	float h1 = 0;
 
@@ -628,23 +634,32 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 			v1 = 0;
 		}
 
-	}
+	}*/
 
-	for (int i = 0; i < my_peptide_lists.master.size(); i++) {
-		my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].tot = 0; 
-	}
+	//for (int i = 0; i < my_peptide_lists.master.size(); i++) {
+	//	my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].tot = 0; 
+	//}
 
-	vector<float> total; 
-	for (int i = 0; i < my_peptide_lists.master.size(); i++) {
-		for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
-			total.push_back(my_peptide_lists.master[i][j].tot);
-		}
-		int a = accumulate(total.begin(), total.end(), 0);
-		my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].tot = a; 
-		a = 0; 
-		total.clear(); 
-	}
+	////vector<float> total;
+	//for (int i = 0; i < my_peptide_lists.master.size(); i++) {
+ //   //MH: Don't copy to a new vector to sum the values in the old vector. Just sum the values in the old vector.
+ //   //for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
+	//	//	total.push_back(my_peptide_lists.master[i][j].tot);
+	//	//}
+	//	//float a = accumulate(total.begin(), total.end(), 0);
+	//	//my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].tot = a;
 
+ //   float total=0; 
+ //   for(size_t j=0;j<my_peptide_lists.master[i].size();j++) total+= my_peptide_lists.master[i][j].tot;
+ //   my_peptide_lists.master[i].back().tot = total;
+ //   //MH: Also, you are overwriting the last value in your vector with the sum. Is that what you want? Why not just
+ //   // store the value in its own variable?
+
+	//	//a = 0; 
+	//	//total.clear(); 
+	//}
+
+  //MH: not sure what this does...
 	for (int i = 0; i < my_peptide_lists.master.size(); i++) {
 		for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
 			if (my_peptide_lists.master[i][j].tot == 0) {
@@ -655,20 +670,18 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 
 
 
-	for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
-		my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].tot = 0;
-	}
+	//for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
+	//	my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].tot = 0;
+	//}
 
-	vector<float> total1;
-	for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
-		for (int j = 0; j < my_peptide_lists.master1[i].size(); j++) {
-			total1.push_back(my_peptide_lists.master1[i][j].tot);
-		}
-		float a1 = accumulate(total1.begin(), total1.end(), 0);
-		my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].tot = a1;
-		a1 = 0;
-		total1.clear();
-	}
+	////vector<float> total1;
+	//for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
+ //   float total=0;
+	//	for (int j = 0; j < my_peptide_lists.master1[i].size(); j++) {
+	//		total=my_peptide_lists.master1[i][j].tot;
+	//	}
+	//	my_peptide_lists.master1[i].back().tot = total;
+	//}
 
 	for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
 		for (int j = 0; j < my_peptide_lists.master1[i].size(); j++) {
@@ -783,17 +796,18 @@ metrics deep_functions::calc1(peptide_lists& my_peptide_lists, metrics& my_metri
 			}
 		}
 		bigone[i][bigone[i].size() - 1].zero_frac = count0 / float(bigone[i].size());
-		bigone[i][bigone[i].size() - 1].matches = bigone[i].size();
+		bigone[i][bigone[i].size() - 1].matches = (int)bigone[i].size();
 		count0 = 0;
 	}
-	vector<double> zero;
+	
+  //vector<double> zero;
+  double zero=0;
 	for (int i = 0; i < bigone.size(); i++) {
 		for (int j = 0; j < bigone[i].size(); j++) {
-			zero.push_back(bigone[i][j].zero_frac);
+			zero+=bigone[i][j].zero_frac;
 		}
 	}
-	double a = accumulate(zero.begin(), zero.end(), 0);
-	double b = a / bigone.size();
+	double b = zero / bigone.size();
 	my_metrics.zero = b; 
 	my_metrics.twice_mc = count2; 
 	my_metrics.once_mc = count1; 
@@ -851,17 +865,14 @@ metrics deep_functions::calc1(peptide_lists& my_peptide_lists, metrics& my_metri
 	bigone1.push_back(test); 
 	bigone1[iteration1].push_back(temp[temp.size() - 1]);
 
-	vector<float> transient; 
+	//vector<float> transient; 
 	for (int i = 0; i < bigone1.size(); i++) {
 		if (bigone1[i].size() > 1 && bigone1[i][0].tp_mc == 0) {
-			for (int j = 0; j < bigone1[i].size(); j++) {
-				transient.push_back(bigone1[i][j].mc_tot);
-			}
-			float hold = accumulate(transient.begin(), transient.end(), 0);
+      float transient=0;
+			for (int j = 0; j < bigone1[i].size(); j++) transient+=bigone1[i][j].mc_tot;
 			
-			float hold1 = bigone1[i][0].tp_tot / hold;
+			float hold1 = bigone1[i][0].tp_tot / transient;
 			bigone1[i][bigone1[i].size() - 1].ratio = hold1;
-			transient.clear(); hold = 0; hold1 = 0; 
 		}
 		if (bigone1[i].size() == 1 && bigone1[i][0].tp_mc == 0) {
 			float hold2 = bigone1[i][0].tp_tot / bigone1[i][0].mc_tot;
@@ -871,25 +882,25 @@ metrics deep_functions::calc1(peptide_lists& my_peptide_lists, metrics& my_metri
 	}
 
 	vector<double> rat; 
+  double rat1=0;
+  int asdf = 0;
 	for (int i = 0; i < bigone1.size(); i++) {
 		for (int j = 0; j < bigone1[i].size(); j++) {
 			rat.push_back(bigone1[i][j].ratio);
+      rat1+= bigone1[i][j].ratio;
+      if(bigone1[i][j].ratio!=0) asdf++;
 		}
 	}
 	
-	double rat1 = accumulate(rat.begin(), rat.end(), 0);
-	int asdf = 0;
-	for (int i = 0; i < rat.size(); i++) {
-		if (rat[i] != 0) {
-			asdf++;
-		}
-	}
-	double rat2 = rat1 / asdf;
+	double rat2 = rat1 / asdf;  //MH: I'm not sure this is being calculated correctly
 	my_metrics.intensity_final = rat2;
  
-	double var = 0;  for (int i = 0; i < rat.size(); ++i) { var += pow(rat[i] - rat2, 2); }
+	double var = 0;  
+  for (int i = 0; i < rat.size(); ++i) { 
+    var += pow(rat[i] - rat2, 2); 
+  }
 	var = var / rat.size(); 
-	double stdv = 0; stdv = sqrt(var); 
+	double stdv = sqrt(var); 
 	my_metrics.stdv_final = stdv; 
 
 
