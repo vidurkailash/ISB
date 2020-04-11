@@ -178,18 +178,24 @@ int main(int argc, char* argv[])
 	my_peptide_lists = my_deep_functions.lcd(my_peptide_lists);
 	my_peptide_lists = my_deep_functions.new_list(my_peptide_lists); 
 
-	cout << "matches found... next step (it's a big one)" << "\n" << endl; 
-	my_match_lists = sr.mzml(my_peptide_lists, my_params);
-	cout << "mzml file cross checked... next step " << "\n" << endl; 
+	if (my_peptide_lists.d_list.size() > 0) {
+		cout << "matches found... next step (it's a big one)" << "\n" << endl;
+		my_match_lists = sr.mzml(my_peptide_lists, my_params);
+		cout << "mzml file cross checked... next step " << "\n" << endl;
 
-	my_peptide_lists = my_deep_functions.reader(my_peptide_lists, my_metrics, my_match_lists);
+		my_peptide_lists = my_deep_functions.reader(my_peptide_lists, my_metrics, my_match_lists);
 
-	
-	cout << "almost there... calculating metrics... results will be printed shortly" << "\n" << endl; 
-	
-	my_metrics = my_deep_functions.calc(my_peptide_lists, my_metrics); 
-	my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
-	
+
+		cout << "almost there... calculating metrics... results will be printed shortly" << "\n" << endl;
+
+		my_metrics = my_deep_functions.calc(my_peptide_lists, my_metrics);
+		my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
+	}
+	else {
+		cout << "no matches between micleaved and trypic sequences were found" << endl; 
+		exit(1);
+	}
+
 	
 
 	cout << "\n" << "----------- XML DATA -----------" << "\n" << endl;
