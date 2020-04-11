@@ -6,6 +6,7 @@
 #include <iostream>
 #include<numeric>
 #include <vector> 
+#include <algorithm>
 
 class peptide_lists {
 public:
@@ -48,8 +49,11 @@ public:
 	peptide_lists new_list(peptide_lists& my_peptide_lists); 
 	metrics calc1(peptide_lists& my_peptide_lists, metrics& my_metircs, my_parameters& my_params);
 
-  float calcPeakArea(std::vector<my_intensities>& v);
+	float calcPeakArea(std::vector<my_intensities>& v);
+	std::vector<float> cleanNoise(std::vector<my_intensities>& v);
 
+private: 
+	static bool compareInten(const my_compare& a, const my_compare& b) { return a.tp_tot > b.tp_tot; };
 }; 
 
 

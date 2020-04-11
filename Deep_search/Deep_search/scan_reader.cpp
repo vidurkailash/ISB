@@ -469,7 +469,61 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 
 
 	//DELETE NOISE (INTENSITIES LESS THAN 10% OF THE MAX) (NOISE)
-	vector<float> querry;
+
+	for (size_t i = 0; i < my_peptide_lists.master.size(); i++) {
+		vector<float> rn;
+		rn = cleanNoise(my_peptide_lists.master[i]);
+		
+		for (size_t n = 0; n < my_peptide_lists.master[i].size() - 1; n++) {
+			for (size_t p = n + 1; p < my_peptide_lists.master[i].size(); p++) {
+				vector<float>::iterator it;
+				it = find(rn.begin(), rn.end(), my_peptide_lists.master[i][p].y);
+				if (it == rn.end()) {
+					my_peptide_lists.master[i].erase(my_peptide_lists.master[i].begin() + p);
+					p = (n + 1) - 1;
+				}
+			}
+		}
+		for (size_t n = 0; n < my_peptide_lists.master[i].size(); n++) {
+			vector<float>::iterator it;
+			it = find(rn.begin(), rn.end(), my_peptide_lists.master[i][n].y);
+			if (it == rn.end()) {
+				my_peptide_lists.master[i].erase(my_peptide_lists.master[i].begin() + n);
+			}
+		}	
+		rn.clear(); 
+	}
+
+	for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
+		vector<float> rn1;
+		rn1 = cleanNoise(my_peptide_lists.master1[i]);
+
+		for (size_t n = 0; n < my_peptide_lists.master1[i].size() - 1; n++) {
+			for (size_t p = n + 1; p < my_peptide_lists.master1[i].size(); p++) {
+				vector<float>::iterator it;
+				it = find(rn1.begin(), rn1.end(), my_peptide_lists.master1[i][p].y);
+				if (it == rn1.end()) {
+					my_peptide_lists.master1[i].erase(my_peptide_lists.master1[i].begin() + p);
+					p = (n + 1) - 1;
+				}
+			}
+		}
+		for (size_t n = 0; n < my_peptide_lists.master1[i].size(); n++) {
+			vector<float>::iterator it;
+			it = find(rn1.begin(), rn1.end(), my_peptide_lists.master1[i][n].y);
+			if (it == rn1.end()) {
+				my_peptide_lists.master1[i].erase(my_peptide_lists.master1[i].begin() + n);
+			}
+		}
+		rn1.clear();
+	}
+
+	// END NOISE FUNCTION 
+
+
+
+
+	/*vector<float> querry;
 	for (int i = 0; i < my_peptide_lists.master.size(); i++) {
 		for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
 			querry.push_back(my_peptide_lists.master[i][j].y);
@@ -546,12 +600,31 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 		}
 
 		querry1.clear();
-	}
+	}*/
 
-	// END NOISE FUNCTION 
+	
+
+	//delete peptides with only one data point
+	vector<vector<my_intensities>> filter;
+	for (size_t i = 0; i < my_peptide_lists.master.size(); i++) {
+		if (my_peptide_lists.master[i].size() > 1) {
+			filter.push_back(my_peptide_lists.master[i]); 
+		}
+	}
+	my_peptide_lists.master = filter; 
+	filter.clear(); 
+	for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
+		if (my_peptide_lists.master1[i].size() > 1) {
+			filter.push_back(my_peptide_lists.master1[i]);
+		}
+	}
+	my_peptide_lists.master1 = filter;
+	filter.clear();
+
 
 
 	cout << "noise deleted" << "\n" << endl; 
+
 
 	//metric calculations
 	vector<float> peak; 
@@ -660,13 +733,13 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 	//}
 
   //MH: not sure what this does...
-	for (int i = 0; i < my_peptide_lists.master.size(); i++) {
+	/*for (int i = 0; i < my_peptide_lists.master.size(); i++) {
 		for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
 			if (my_peptide_lists.master[i][j].tot == 0) {
 				my_peptide_lists.master[i][j].tot = my_peptide_lists.master[i][j].y;
 			}
 		}
-	}
+	}*/
 
 
 
@@ -683,13 +756,13 @@ peptide_lists deep_functions::reader(peptide_lists& my_peptide_lists, metrics& m
 	//	my_peptide_lists.master1[i].back().tot = total;
 	//}
 
-	for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
+	/*for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
 		for (int j = 0; j < my_peptide_lists.master1[i].size(); j++) {
 			if (my_peptide_lists.master1[i][j].tot == 0) {
 				my_peptide_lists.master1[i][j].tot = my_peptide_lists.master1[i][j].y;
 			}
 		}
-	}
+	}*/
 
 	vector<my_intensities> final;
 	int cycle = 0;
@@ -868,7 +941,7 @@ metrics deep_functions::calc1(peptide_lists& my_peptide_lists, metrics& my_metri
 	//vector<float> transient; 
 	for (int i = 0; i < bigone1.size(); i++) {
 		if (bigone1[i].size() > 1 && bigone1[i][0].tp_mc == 0) {
-      float transient=0;
+			float transient=0;
 			for (int j = 0; j < bigone1[i].size(); j++) transient+=bigone1[i][j].mc_tot;
 			
 			float hold1 = bigone1[i][0].tp_tot / transient;
@@ -882,13 +955,13 @@ metrics deep_functions::calc1(peptide_lists& my_peptide_lists, metrics& my_metri
 	}
 
 	vector<double> rat; 
-  double rat1=0;
-  int asdf = 0;
+	double rat1=0;
+	int asdf = 0;
 	for (int i = 0; i < bigone1.size(); i++) {
 		for (int j = 0; j < bigone1[i].size(); j++) {
 			rat.push_back(bigone1[i][j].ratio);
-      rat1+= bigone1[i][j].ratio;
-      if(bigone1[i][j].ratio!=0) asdf++;
+			rat1+= bigone1[i][j].ratio;
+			if(bigone1[i][j].ratio!=0) asdf++;
 		}
 	}
 	
@@ -896,13 +969,31 @@ metrics deep_functions::calc1(peptide_lists& my_peptide_lists, metrics& my_metri
 	my_metrics.intensity_final = rat2;
  
 	double var = 0;  
-  for (int i = 0; i < rat.size(); ++i) { 
-    var += pow(rat[i] - rat2, 2); 
-  }
+	for (int i = 0; i < rat.size(); ++i) { 
+		var += pow(rat[i] - rat2, 2); 
+	}
 	var = var / rat.size(); 
 	double stdv = sqrt(var); 
 	my_metrics.stdv_final = stdv; 
 
+	vector<my_compare> last_one;
+	vector<my_compare> last_one1;
+	for (size_t i = 0; i < bigone1.size(); i++) {
+		for (size_t j = 0; j < bigone1[i].size(); j++) {
+			last_one.push_back(bigone1[i][j]);
+		}
+	}
+	sort(last_one.begin(), last_one.end(), compareInten); 
+	last_one1.push_back(last_one[0]); 
+	for (size_t i = 1; i < last_one.size(); i++) {
+		if (last_one[i].tryp_seq == last_one[i - 1].tryp_seq) continue;
+		last_one1.push_back(last_one[i]); 
+
+	}
+	last_one = last_one1; 
+	for (size_t i = 0; i < 20; i++) {
+		cout << last_one[i].miss_cleave_seq << "  " << last_one[i].mc_tot << "  " << last_one[i].tryp_seq << "  " << last_one[i].tp_tot << endl; 
+	}
 
 
 

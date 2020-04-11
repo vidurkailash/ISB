@@ -244,14 +244,14 @@ peptide_lists deep_functions::new_list(peptide_lists& my_peptide_lists) {
 
 	}
 
-	cout << my_peptide_lists.d_list.size() << endl; 
+
 
 	/*for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
 		cout << my_peptide_lists.d_list[i].pep_seq << "  " << my_peptide_lists.d_list[i].charge << "   " << my_peptide_lists.d_list[i].mass << "  " << my_peptide_lists.d_list[i].mz << "  " << my_peptide_lists.d_list[i].cleave_loc << "   " << my_peptide_lists.d_list[i].cleave_pos << " ||||| " << my_peptide_lists.d_list[i].d_pep_seq << "  " << my_peptide_lists.d_list[i].d_pep_seq_charge << "  " << my_peptide_lists.d_list[i].d_pep_seq_mass << "  " << my_peptide_lists.d_list[i].d_pep_seq_mz << endl;
 	}*/
 
 
-	/*cout << my_peptide_lists.d_list.size() << endl;*/
+	cout << my_peptide_lists.d_list.size() << endl;
 
 	return my_peptide_lists;
 
@@ -313,6 +313,44 @@ metrics deep_functions::calc(peptide_lists& my_peptide_lists, metrics& my_metric
 
 }
 
+
+std::vector<float> deep_functions::cleanNoise(std::vector<my_intensities>& v) {
+
+	vector<float> querry;
+	vector<float> tmp;
+	 
+	for (size_t i = 0; i < v.size(); i++) {
+		querry.push_back(v[i].y);
+	}
+	int index = max_element(querry.begin(), querry.end()) - querry.begin();
+	float val = *max_element(querry.begin(), querry.end());
+	int i = index; 
+	
+	while (i > 0) {
+		if (querry[i] > 0.1 * val) {
+			tmp.push_back(querry[i]);
+			i--;
+		}
+		else { break; }
+	}
+	i = index;
+	while (i < querry.size()) {
+		if (querry[i] > 0.1 * val) {
+			tmp.push_back(querry[i]);
+			i++;
+		}
+		else { break; }
+	}
+
+	querry = tmp; 
+	tmp.clear(); 
+
+
+	return querry;
+}
+
+
+
 //MH: This function replicates computing (and storing) the area between every two points.
 // It then returns the sum of the area of the peak. Note that the boundaries are assumed
 // to be the first and last points in the array.
@@ -331,3 +369,6 @@ float deep_functions::calcPeakArea(std::vector<my_intensities>& v){
   }
   return total;
 }
+
+
+
