@@ -39,21 +39,25 @@ public:
 class deep_functions {
 public:
 	peptide_lists xml_parse(my_parameters& my_params);
-	peptide_lists tryptic_calc(peptide_lists& my_peptide_lists);
-	peptide_lists miss_cleave(peptide_lists& my_peptide_lists);
-	peptide_lists delete_dup(peptide_lists& my_peptide_lists);
-	//match_lists mzml(peptide_lists& my_peptide_lists, my_parameters& my_params);
-	peptide_lists reader(peptide_lists& my_peptide_lists, metrics& my_metrics, match_lists& my_match_lists);
+	bool tryptic_calc(peptide_lists& my_peptide_lists);
+	bool miss_cleave(peptide_lists& my_peptide_lists);
+	bool delete_dup(peptide_lists& my_peptide_lists);
+	bool reader(peptide_lists& my_peptide_lists, metrics& my_metrics, match_lists& my_match_lists);
 	metrics calc(peptide_lists& my_peptide_lists, metrics& my_metrics);
-	peptide_lists lcd(peptide_lists& my_peptide_lists); 
+	bool lcd(peptide_lists& my_peptide_lists); 
 	peptide_lists new_list(peptide_lists& my_peptide_lists); 
 	metrics calc1(peptide_lists& my_peptide_lists, metrics& my_metircs, my_parameters& my_params);
 
 	float calcPeakArea(std::vector<my_intensities>& v);
-	std::vector<float> cleanNoise(std::vector<my_intensities>& v);
+	bool cleanNoise(std::vector<my_intensities>& v);
 
 private: 
 	static bool compareInten(const my_compare& a, const my_compare& b) { return a.tp_tot > b.tp_tot; };
+  static bool compareSeqZ(const my_features& a, const my_features& b) {
+    int i = a.pep_seq.compare(b.pep_seq);
+    if (i == 0) return (a.charge < b.charge);
+    else return (i < 0);
+  }
 }; 
 
 
