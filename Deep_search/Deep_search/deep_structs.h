@@ -3,6 +3,59 @@
 
 #include <string>
 
+//MH: Simpler data structure for storing the precursor intensity array
+typedef struct dsXIC {
+  float rTime;
+  float intensity;
+} dsXIC;
+
+//MH: New suggested data structure
+//I invision this to be an alternative to my_features;
+typedef struct dsPeptide {
+  std::string pep_seq;
+  std::string prot_seq;
+  int charge;
+  float rtime;
+  double mass;
+  double mz;
+  double probability;
+  int miss_cleaves; //this variable has great dual functionality. If it is 0, then fully tryptic peptide. If >0, then it must be miscleaved.
+  char prev_aa;     //for memory efficiency
+  char next_aa;     //for memory efficiency
+  char cleave_loc;  //this might not be needed under new paradigm
+  int cleave_pos;   //this might not be needed under new paradigm
+  std::vector<dsXIC> XIC;  //stands for eXtracted Ion Chromatogram
+  double areaXIC;
+} dsPeptide;
+
+//MH: New suggested data structure
+//for tracking pairs of peptides
+typedef struct dsPair {
+  size_t trypIndex;
+  size_t missIndex;
+  double ratio;
+} dsPair;
+
+
+//MH: A Protein-centric structure
+typedef struct dsProtein {
+  std::string prot_seq;
+  std::vector<size_t> trypPeptides; //references to peptides counted as tryptic
+  std::vector<size_t> missPeptides; //references to peptides counted as missed cleaved
+  float sumTryp;
+  float sumMiss;
+  float percentMiss;
+} dsProtein;
+
+//MH: Using the above structures it is possible to 
+//1. Parse a pepXML file and catalog all peptides in vector<dsPeptide>.
+//2. Iterate vector<dsPeptide> while reading an mzML to extract all precursor signals and store them  in each peptie's vector<dsXIC>
+//3. Create a single protein array, vector<dsProtein> that stores the sum of all peptide signals, as well as references to vector<dsPeptide>
+//  if it is desired to drill down into the details.
+//4. A vector<dsPair> can be created to replicate the old functionality of pairing any two peptides from vector<dsPeptide>
+
+
+
 typedef struct parameters {
 
 	double pep_prob; //peptide prophet probability parameter 
