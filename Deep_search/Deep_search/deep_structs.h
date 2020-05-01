@@ -2,30 +2,40 @@
 #define deep_structs
 
 #include <string>
+#include <vector>
 
 //MH: Simpler data structure for storing the precursor intensity array
 typedef struct dsXIC {
   float rTime;
   float intensity;
+  float tot; 
 } dsXIC;
 
 //MH: New suggested data structure
-//I invision this to be an alternative to my_features;
+//I envision this to be an alternative to my_features;
 typedef struct dsPeptide {
   std::string pep_seq;
   std::string prot_seq;
+  bool proteotypic = 0;
   int charge;
-  float rtime;
-  double mass;
-  double mz;
+  float xml_rtime;
+  double pre_neutral_mass;
+  double calc_neutral_mass;
+  double xml_mz;
   double probability;
   int miss_cleaves; //this variable has great dual functionality. If it is 0, then fully tryptic peptide. If >0, then it must be miscleaved.
-  char prev_aa;     //for memory efficiency
-  char next_aa;     //for memory efficiency
+  std::string prev_aa;     //for memory efficiency
+  std::string next_aa;     //for memory efficiency
   char cleave_loc;  //this might not be needed under new paradigm
   int cleave_pos;   //this might not be needed under new paradigm
+  int spec_sn;
+  int spec_size;
+  double spec_mz;
+  float spec_rt;
+  float spec_intensity;
   std::vector<dsXIC> XIC;  //stands for eXtracted Ion Chromatogram
   double areaXIC;
+  double tolerance; 
 } dsPeptide;
 
 //MH: New suggested data structure
@@ -33,26 +43,26 @@ typedef struct dsPeptide {
 typedef struct dsPair {
   size_t trypIndex;
   size_t missIndex;
+  std::string ft_pep_seq; 
+  std::string mc_pep_seq; 
   double ratio;
+  double ft_areaXIC;
+  double mc_areaXIC;
 } dsPair;
 
 
-//MH: A Protein-centric structure
 typedef struct dsProtein {
-  std::string prot_seq;
-  std::vector<size_t> trypPeptides; //references to peptides counted as tryptic
-  std::vector<size_t> missPeptides; //references to peptides counted as missed cleaved
-  float sumTryp;
-  float sumMiss;
-  float percentMiss;
+	std::string prot_seq;
+	std::vector<std::string> trypPeptides; //references to peptides counted as tryptic
+	std::vector<std::string> missPeptides; //references to peptides counted as missed cleaved
+	float sumTryp;
+	float sumMiss;
+	float percentMiss;
 } dsProtein;
 
-//MH: Using the above structures it is possible to 
-//1. Parse a pepXML file and catalog all peptides in vector<dsPeptide>.
-//2. Iterate vector<dsPeptide> while reading an mzML to extract all precursor signals and store them  in each peptie's vector<dsXIC>
-//3. Create a single protein array, vector<dsProtein> that stores the sum of all peptide signals, as well as references to vector<dsPeptide>
-//  if it is desired to drill down into the details.
-//4. A vector<dsPair> can be created to replicate the old functionality of pairing any two peptides from vector<dsPeptide>
+
+
+
 
 
 
@@ -63,9 +73,13 @@ typedef struct parameters {
 	std::string filename; //filename parameter
 	char ident; //identifieer for ipro or peptide prophet 
 	std::string mzml; //spectra file
+	float run_time; 
+	double ppm; 
 
 
 } my_parameters;
+
+
 
 //MH: Good rules to know about data types. 
 //1. When you need discrete values, use int (i.e. charge states)
@@ -74,74 +88,89 @@ typedef struct parameters {
 //   This is very important when working with parts-per-million and parts-per-billion precisions.
 //4. When decimal place precision isn't so important (i.e. retention time, peak intensity) then use float.
 //   Or if you are not sure, don't use float and just use double.
-typedef struct features {
-
-	std::string pep_seq;
-	int charge;
-	float rtime;
-	double mass; 
-	double mz; 
-	int miss_cleaves;
-	std::string prev_aa;
-	std::string next_aa;
-
-	std::string d_pep_seq;
-	int d_pep_seq_charge;
-	float d_pep_seq_rt;
-	double d_pep_seq_mass;
-	double d_pep_seq_mz; 
-	int d_miss_cleaves;
-	char cleave_loc;
-	int cleave_pos; 
-
-	
-} my_features;
 
 
 
-typedef struct intensities {
-	float x;
-	float y; 
-	std::string seq;
-	float tot;
-	int mc;
 
-} my_intensities;
-
-
-typedef struct compare {
-	std::string miss_cleave_seq;
-	std::string tryp_seq;
-	float mc_tot;
-	float tp_tot;
-	int mc_mc;
-	int tp_mc;
-	int matches; 
-	float zero_frac; 
-	float ratio; 
-
-} my_compare;
-
-//MH: commenting this out as it seems to be kruft.
-//typedef struct results {
-//	float miss_tot;
-//	float tryp_tot; 
+//typedef struct features {
 //
-//} my_results;
+//	std::string pep_seq;
+//	int charge;
+//	float rtime;
+//	double mass; 
+//	double calc_mass; 
+//	double mz; 
+//	int miss_cleaves;
+//	std::string prev_aa;
+//	std::string next_aa;
+//
+//	std::string prot_seq;
+//	bool proteotypic = 0; 
+//
+//	std::string d_pep_seq;
+//	int d_pep_seq_charge;
+//	float d_pep_seq_rt;
+//	double d_pep_seq_mass;
+//	double d_pep_seq_mz; 
+//	int d_miss_cleaves;
+//	char cleave_loc;
+//	int cleave_pos; 
+//	
+//	
+//} my_features;
 
-typedef struct markers {
 
-	float spec_rt;
-	int spec_sn;
-	int spec_size; 
-	double spec_mz; 
-	float mzml_rt;
-	double mzml_mz;
-	float spec_intensity;
-	std::string pep_seq; 
-	int miss_cleaves; 
 
-} my_markers; 
+//typedef struct intensities {
+//	float x;
+//	float y; 
+//	std::string seq;
+//	float tot;
+//	int mc;
+//
+//	std::string prot_seq;
+//	bool proteotypic;
+//
+//	float ft_inten; 
+//	float mc_inten; 
+//	float tot_inten; 
+//	float prot_frac; 
+//	int ft_tot;
+//	int mc_tot; 
+//
+//} my_intensities;
+
+
+//typedef struct compare {
+//	std::string miss_cleave_seq;
+//	std::string tryp_seq;
+//	float mc_tot;
+//	float tp_tot;
+//	int mc_mc;
+//	int tp_mc;
+//	int matches; 
+//	float zero_frac; 
+//	float ratio; 
+//
+//} my_compare;
+
+
+//typedef struct markers {
+//
+//	float spec_rt;
+//	int spec_sn;
+//	int spec_size; 
+//	double spec_mz; 
+//	float mzml_rt;
+//	double mzml_mz;
+//	float spec_intensity;
+//	std::string pep_seq; 
+//	int miss_cleaves; 
+//
+//	std::string prot_seq;
+//	bool proteotypic;
+//
+//} my_markers; 
 
 
 typedef struct metrics {
@@ -170,9 +199,10 @@ typedef struct metrics {
 	double tryp_avg_high;
 	int twice_mc; 
 	int once_mc; 
-	double zero; 
-	double intensity_final; 
-	double stdv_final; 
+	float intensity_final; 
+	float stdv_final; 
+	float protein_final; 
+	float protein_stdv; 
 
 } my_metrics;
 

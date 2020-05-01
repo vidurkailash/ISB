@@ -24,12 +24,18 @@
     <ClInclude Include="deep_structs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="protein_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="deep_class.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="scan_reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="protein_reader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
