@@ -8,6 +8,7 @@
 #include <vector>
 #include "deep_class.h"
 #include "scan_reader.h"
+#include "protein_reader.h"
 #include <algorithm>
 #include <list>
 #include <iterator>
@@ -26,7 +27,10 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	double input_prob = 10;
 	string input_filename = "q";
 	string input_mzml = "spec";
-  my_parameters my_params;
+	float input_rtime = 2; 
+	double input_ppm = 10; 
+
+    my_parameters my_params;
 
   //MH: set default values
   my_params.ident='b';
@@ -42,9 +46,9 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				// call warning function 
 			}
 		}
-    else if (string(argv[i]) == "--iprophet" || string(argv[i]) == "-i") {
-      my_params.ident = 'a';
-    }
+        else if (string(argv[i]) == "--iprophet" || string(argv[i]) == "-i") {
+            my_params.ident = 'a';
+        }
 		else if (string(argv[i]) == "--filename" || string(argv[i]) == "-f") {
 			if (i + 1 < argc) {
 				input_filename = string(argv[++i]);
@@ -65,6 +69,17 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				// call warning function 
 			}
 		}
+		else if (string(argv[i]) == "--rtime" || string(argv[i]) == "-r") {
+			if (i + 1 < argc) {
+				input_rtime = (float)atof(argv[++i]);
+			}
+		}
+		else if (string(argv[i]) == "--ppm" || string(argv[i]) == "-p") {
+			if (i + 1 < argc) {
+				input_ppm = (float)atof(argv[++i]);
+		    }
+		}
+
 		else {
 			cout << "one or more parameters entered are invalid, please consult documentation and re-enter valid parameters" << endl;
 			exit(1);
@@ -89,6 +104,8 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	else my_params.pep_prob = input_prob;	
 	my_params.filename = input_filename;
 	my_params.mzml = input_mzml; 
+	my_params.run_time = input_rtime;
+	my_params.ppm = input_ppm; 
 
 	return my_params;
 
@@ -154,119 +171,93 @@ int main(int argc, char* argv[])
 
 
 	deep_functions my_deep_functions;
-  scan_reader sr;
+	scan_reader sr;
+	protein_reader pr; 
 
 	my_parameters my_params;
 	my_params = cmd_input(argc, argv);
 	warnings(my_params);
 
 	peptide_lists my_peptide_lists;
-	match_lists my_match_lists;
-  metrics my_metrics;
 	
-  //MH: Parse the pepXML file and return a list of PSMs
+	metrics my_metrics;
+	
+  //Parse the pepXML file and return a list of PSMs
   my_peptide_lists = my_deep_functions.xml_parse(my_params);
-	cout << "XML parsed, " << my_peptide_lists.all.size() << " of " << my_peptide_lists.total << " PSMs above probability threshold." << endl; 
+	cout << "XML parsed, " << my_peptide_lists.all_real.size() << " of " << my_peptide_lists.total << " PSMs above probability threshold." << endl; 
+
+
+
 	
-  //MH: Count the tryptic and non-tryptic PSMs
+  //Count the tryptic and non-tryptic PSMs
 	if(my_deep_functions.tryptic_calc(my_peptide_lists)){
-    cout << my_peptide_lists.tryptic.size() << " tryptic PSMs, and " << my_peptide_lists.non_tryptic.size() << " non-tryptic PSMs" << endl;
+    cout << my_peptide_lists.tryptic_real.size() << " tryptic PSMs, and " << my_peptide_lists.non_tryptic_real.size() << " non-tryptic PSMs" << endl;
   } else {
-    //MH: Right now, the function can never return false
+    //Right now, the function can never return false
   }
 	
-  //MH: Count the miscleaved PSMs
+  //Count the miscleaved PSMs
   if(my_deep_functions.miss_cleave(my_peptide_lists)){
     int mc=0;
-    for(size_t i=0;i<my_peptide_lists.tryptic.size();i++){
-      if(my_peptide_lists.tryptic[i].miss_cleaves>0) mc++;
+    for(size_t i=0;i<my_peptide_lists.tryptic_real.size();i++){
+      if(my_peptide_lists.tryptic_real[i].miss_cleaves>0) mc++;
     }
-    cout << mc << " of " << my_peptide_lists.tryptic.size() << " tryptic PSMs are miscleaved." << endl;
+    cout << mc << " of " << my_peptide_lists.tryptic_real.size() << " tryptic PSMs are miscleaved." << endl;
   } else {
-    //MH: Right now, the function can never return false
+    //Right now, the function can never return false
   }
 
-  //MH: Trim the list from PSMs to peptides
+ 
+
+
+	cout << my_peptide_lists.all_real.size() << endl; 
+
 	if(my_deep_functions.delete_dup(my_peptide_lists)){
-    cout << my_peptide_lists.tryp_unique_z.size() << " unique tryptic PSMs." << endl;
-    cout << "  " << my_peptide_lists.tryp_unique.size() << " are unique tryptic peptides," << endl;
-    cout << "  and " << my_peptide_lists.miss_unique.size() << " of those have miscleavages." << endl;
-  } else {
-    //MH: Right now, the function can never return false
-  }
-
-  //MH: This function iterates over all peptides to determine pairs of tryptic and miscleaved to target.
-	if(my_deep_functions.lcd(my_peptide_lists)){
-    cout << my_peptide_lists.d_list.size() << " unique tryptic-miscleaved peptide pairs." << endl;
-    //for(size_t i=0;i<my_peptide_lists.d_list.size();i++){
-    //  cout << my_peptide_lists.d_list[i].d_pep_seq << "\t" << my_peptide_lists.d_list[i].pep_seq << endl;
-    //}
-  } else {
-    //MH: Right now, the function can never return false
-  }
-  //MH: Obsolete
-	//my_peptide_lists = my_deep_functions.new_list(my_peptide_lists); 
-
-  //MH: check if there are peptide pairs to analyze
-	if (my_peptide_lists.d_list.size() == 0) {
-    cout << "no matches between micleaved and trypic sequences were found" << endl; 
-		return 1;
+    cout << my_peptide_lists.tryp_unique_z_real.size() << " unique tryptic PSMs." << endl;
+    cout << my_peptide_lists.tryp_unique_real.size() << " are unique tryptic peptides," << endl;
+    cout << "and " << my_peptide_lists.miss_unique_real.size() << " of those have miscleavages." << endl;
+	} 
+	else {
+    //Right now, the function can never return false
 	}
 
 
-  cout << my_peptide_lists.d_list.size() << " matches found... next step (it's a big one)" << endl;
-	my_match_lists = sr.mzml(my_peptide_lists, my_params);
+
+ //MH: This function iterates over all peptides to determine pairs of tryptic and miscleaved to target.
+	if(my_deep_functions.lcd(my_peptide_lists, my_params)){
+		cout << "\n" << "m/z calculated for both lists" << "\n" << endl; 
+	} else {
+    //MH: Right now, the function can never return false
+	}
+
+  
+
+	my_peptide_lists = sr.mzml(my_peptide_lists, my_params);
 	cout << "mzml file cross checked... next step " << "\n" << endl;
 
-	if(my_deep_functions.reader(my_peptide_lists, my_metrics, my_match_lists)){
-  } else {
-      //MH: Right now, the function can never return false
-  }
-
-
-		cout << "almost there... calculating metrics... results will be printed shortly" << "\n" << endl;
-
-		my_metrics = my_deep_functions.calc(my_peptide_lists, my_metrics);
-		my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
-		
+	
 	
 
-	cout << "\n" << "----------- XML DATA -----------" << "\n" << endl;
-	cout << "-- SANTIY CHECKS --" << "\n" << endl; 
-	cout << "Total PSM in file:\t\t\t\t\t\t\t\t" << my_metrics.total_psm << "\n" << endl;
-	cout << "# of PSM above entered threshold value:\t\t\t\t\t\t" << my_metrics.psm_num << "\n" << endl;
-	cout << "# of tryptic PSM above entered threshold value:\t\t\t\t\t" << my_metrics.tryptic_num << "\n" << endl;
-	cout << "# of non tryptic PSM above entered threshold value:\t\t\t\t" << my_metrics.nontryptic_num << "\n" << endl;
-	cout << "Tryptic peptides with unique charges:\t\t\t\t\t\t" << my_metrics.unique_pep_charge << "\n" << endl;
-	cout << "Tryptic peptides with unique sequences:\t\t\t\t\t\t" << my_metrics.unique_peptides << "\n" << endl;
-	cout << "Avg seuqnce length of unique tryptic peptide:\t\t\t\t\t" << my_metrics.avg_pep_length << "\n" << endl;
-	cout << "Tryptic psm / psm above threshold:\t\t\t\t\t\t" << my_metrics.tryp_frac << "\n" << endl;
-	cout << "Non tryptic psm / psm above threshold:\t\t\t\t\t\t" << my_metrics.nontryp_frac << "\n" << endl;
-	cout << "Unique peptides / psm above threshold:\t\t\t\t\t\t" << my_metrics.pep_frac << "\n" << endl;
-	cout << "Avg # of misscleaves per unique peptide that is misclevaed:\t\t\t" << my_metrics.miss_cleave_avg << "\n" << endl;
 
-	cout << "-- USEFUL STATS --" << "\n" << endl; 
-	cout << "# of unique pepides that are miss cleaved:\t\t\t\t\t" << my_metrics.num_miss_cleave_pep << "\n" << endl;
-	cout << "# of total misscleaves amognst unique peptides:\t\t\t\t\t" << my_metrics.num_miss_cleave_total << "\n" << endl;
-	cout << "# of total misscleaves amongst unique peptides / total # of unique peptides:\t" << my_metrics.miss_cleave_rate_pep << "\n" << endl;
-	cout << "# of misscleaved tryptic psm above threshold: \t\t\t\t\t" << my_metrics.num_miss_cleave_psm << "\n" << endl;
-	cout << "# of total miss cleaves amongst tryptic psm:\t\t\t\t\t" << my_metrics.num_tot_miss_cleave_psm << "\n" << endl;
-	cout << "# of total misscleaves amongst tryptic psm / total # tryptic psm aove threshold:\t" << my_metrics.miss_cleave_rate_psm << "\n" << endl;
-	cout << "# of misscleaved unique peptides / total # of unique peptides:\t\t\t" << my_metrics.golden_stat_unique_pep << " ** " << "\n" << endl;
-	cout << "# of miss cleaved tryptic psm / total tryptic psm above threshold:\t\t" << my_metrics.golden_stat_psm << " ** " << "\n" << endl; 
 
-	cout << "\n" << "---------- MZML DATA ---------" << "\n" << endl;
-	cout << "-- SANTIY CHECKS --" << "\n" << endl; 
-	cout << "# of fully tryptic peptides found that has a match to a miscleaved peptide:\t" << my_metrics.find_num << "\n" << endl; 
-	cout << "avg highest peak intensity for miscleaved peptide: \t\t\t\t" << my_metrics.miss_avg_high << "\n" << endl; 
-	cout << "avg highest peak intensity for trypitc peptide: \t\t\t\t\t" << my_metrics.tryp_avg_high << "\n" << endl; 
-	cout << "# of miscleaved peptides that have fully tryptic matches that have 2 miscleaves:\t " << my_metrics.twice_mc << "\n" << endl; 
-	cout << "# of miscleaved peptides that have fully tryptic matches that have 1 miscleave:\t " << my_metrics.once_mc << "\n" << endl;
+	if(my_deep_functions.reader(my_peptide_lists, my_metrics)){} 
+	else {
+      //MH: Right now, the function can never return false
+	}
 
-	cout << "-- USEFUL STATS --" << "\n" << endl; 
-	cout << "fraction of tryptic matches that have zero miscleaves:\t\t\t " << my_metrics.zero << "\n" << endl; 
-	cout << "avg ratio of intensities: 0 miscleave full tryptic peptides / 1 or 2 miscleave peptides:\t" << my_metrics.intensity_final << " ** " << "\n" << endl; 
-	cout << "stdv of ratio of intensities: \t\t\t\t\t\t\t\t" << my_metrics.stdv_final << " ** " << "\n" << endl; 
+
+	
+	cout << "computing protein level stats" << endl; 
+	if(pr.prot_stats(my_peptide_lists)){}
+	else{}
+
+
+	cout << "almost there... calculating metrics... results will be printed shortly" << "\n" << endl;
+
+	my_metrics = my_deep_functions.calc(my_peptide_lists, my_metrics);
+	my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
+		
+	my_deep_functions.print(my_peptide_lists, my_metrics); 
 
 	return 0;
 
