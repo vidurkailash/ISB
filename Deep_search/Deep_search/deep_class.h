@@ -52,6 +52,7 @@ public:
 	std::vector<dsPeptide> xic_total_results;
 	std::vector<std::vector<dsPeptide>> prot_f_real;
 	std::vector<dsProtein> prot_f;
+	std::vector<dsProtein> prot_f1;
 
 };
 
@@ -87,6 +88,7 @@ private:
 	}
 	static bool compareTrypIndex(const dsPair& a, const dsPair& b) { return a.trypIndex < b.trypIndex; }
 	static bool compareMissIndex(const dsPair& a, const dsPair& b) { return a.missIndex < b.missIndex; }
+	static bool comparePercentMiss(const dsProtein& a, const dsProtein& b) { return a.percentMiss < b.percentMiss;  }
 }; 
 
 

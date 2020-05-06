@@ -100,6 +100,16 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
 
 bool deep_functions::tryptic_calc(peptide_lists& my_peptide_lists) {
 
+    
+    
+    // add parameters for cleave site(s) 
+    //for size of inputted string, make dynamic if statment (look up how to do this) 
+    
+    
+    
+     
+    
+    
     int c = 0;
     int d = 0;
 
@@ -1184,11 +1194,19 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
         my_peptide_lists.peptide_matches1.push_back(my_peptide_lists.peptide_matches[i]);
     }
 
-    cout << "\n" << "-- 20 TWENTY MOST ABUNDANT --" << "\n" << endl;
+    cout << "\n" << "-- 20 TWENTY MOST ABUNDANT PEPTIDES --" << "\n" << endl;
     my_peptide_lists.peptide_matches = my_peptide_lists.peptide_matches1;
-    for (size_t i = 0; i < 20; i++) {
-        cout << my_peptide_lists.peptide_matches[i].mc_pep_seq << "  " << my_peptide_lists.peptide_matches[i].mc_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_pep_seq << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
+    if (my_peptide_lists.peptide_matches.size() < 20) {
+        for (size_t i = 0; i < my_peptide_lists.peptide_matches.size(); i++) {
+            cout << i+1 << ": " << my_peptide_lists.peptide_matches[i].mc_pep_seq << "  " << my_peptide_lists.peptide_matches[i].mc_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_pep_seq << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
+        }
     }
+    else {
+        for (size_t i = 0; i < 20; i++) {
+            cout << i+1 << ": " << my_peptide_lists.peptide_matches[i].mc_pep_seq << "  " << my_peptide_lists.peptide_matches[i].mc_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_pep_seq << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
+        }
+    }
+    
 
    
 
@@ -1215,6 +1233,33 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
     cout << "avg percent miss within protein: misscleaved peptides sum intensity / total sum intensity:\t" << my_metrics.protein_final << " ** " << "\n" << endl;
     cout << "stdv of percent miss: \t\t\t\t\t\t\t\t" << my_metrics.protein_stdv << " ** " << "\n" << endl;
 
+
+    sort(my_peptide_lists.prot_f.begin(), my_peptide_lists.prot_f.end(), comparePercentMiss); 
+
+ 
+
+
+    cout << "\n" << "-- 20 TWENTY MOST ABUNDANT PROTEINS--" << "\n" << endl;
+    
+    if (my_peptide_lists.prot_f.size() < 20) {
+        for (size_t i = 0; i < my_peptide_lists.prot_f.size(); i++) {
+            cout << i + 1 << ": " << my_peptide_lists.prot_f[i].prot_seq << "  " << my_peptide_lists.prot_f[i].sumTryp << "  " << my_peptide_lists.prot_f[i].sumMiss << "  " << my_peptide_lists.prot_f[i].percentMiss <<  endl;
+        }
+    }
+    else {
+        for (size_t i = 0; i < 20; i++) {
+            cout << i + 1 << ": " << my_peptide_lists.prot_f[i].prot_seq << "  " << my_peptide_lists.prot_f[i].sumTryp << "  " << my_peptide_lists.prot_f[i].sumMiss << "  " << my_peptide_lists.prot_f[i].percentMiss << endl;
+        }
+    }
+
+    int count =0; 
+    for (size_t i = 0; i < my_peptide_lists.prot_f.size(); i++) {
+        if (my_peptide_lists.prot_f[i].percentMiss == 0 /*&& my_peptide_lists.prot_f[i].trypPeptides.size() >= 5*/) {
+            count++; 
+        }
+    }
+
+    cout << "\n" << count << "  proteins out of " << my_peptide_lists.prot_f.size() << " are entirely made up of tryptic peptides" << endl; 
 
    /* for (int i = 0; i < my_peptide_lists.prot_f.size(); i++) {
         cout << my_peptide_lists.prot_f[i].prot_seq << "   " << my_peptide_lists.prot_f[i].trypPeptides.size() << "   " << my_peptide_lists.prot_f[i].missPeptides.size() << "   " << my_peptide_lists.prot_f[i].sumTryp << "   " << my_peptide_lists.prot_f[i].sumMiss << "   " << my_peptide_lists.prot_f[i].percentMiss << endl;
