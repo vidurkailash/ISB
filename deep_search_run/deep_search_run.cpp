@@ -20,6 +20,7 @@ using namespace std;
 
 my_parameters cmd_input(int argc, char* argv[]);
 void warnings(my_parameters& my_params);
+void info_description(); 
 
 // COMMAND LINE PARSE FUNCTION 
 my_parameters cmd_input(int argc, char* argv[]) {
@@ -41,8 +42,8 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				input_prob = atof(argv[++i]);
 			}
 			else {
-				cout << "probability entered is invalid" << endl;
-				exit(1);
+				/*cout << "probability entered is invalid" << endl;
+				exit(1);*/
 				// call warning function 
 			}
 		}
@@ -54,8 +55,8 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				input_filename = string(argv[++i]);
 			}
 			else {
-				cout << "xml filename entered is invalid" << endl;
-				exit(1);
+				/*cout << "xml filename entered is invalid" << endl;
+				exit(1);*/
 				// call warning function 
 			}
 		}
@@ -64,8 +65,8 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				input_mzml = string(argv[++i]);
 			}
 			else {
-				cout << "mzml filename entered is invalid" << endl;
-				exit(1);
+				/*cout << "mzml filename entered is invalid" << endl;
+				exit(1);*/
 				// call warning function 
 			}
 		}
@@ -80,21 +81,24 @@ my_parameters cmd_input(int argc, char* argv[]) {
 		    }
 		}
 
-		else {
+		/*else {
 			cout << "one or more parameters entered are invalid, please consult documentation and re-enter valid parameters" << endl;
 			exit(1);
-		}
+		}*/
 	}
 
 	//MAKES SURE THESE PARAMETERS ARE ENTERED AND ARE VALID
 	if (input_prob == 10) {
-		cout << "probability entered is invalid" << endl; exit(1);
+		/*cout << "probability entered is invalid" << endl; exit(1);*/
+		info_description(); 
 	}
 	if (input_filename == "q") {
-		cout << "xml filename entered is invalid" << endl; exit(1);
+		/*cout << "xml filename entered is invalid" << endl; exit(1);*/
+		info_description();
 	}
 	if (input_mzml == "spec") {
-		cout << "mzml filename entered is invalid" << endl; exit(1);
+		/*cout << "mzml filename entered is invalid" << endl; exit(1);*/
+		info_description();
 	}
 
 
@@ -112,18 +116,40 @@ my_parameters cmd_input(int argc, char* argv[]) {
 }
 
 
+void info_description() {
+	
+	cout << "QUICK TUTORIAL" << "\n" << endl; 
+	cout << "Example:" << endl; 
+	cout << ">deep_search_run.exe -f <file.pep.xml> -t <0-1> -m <file.mzml> [-i -r <float> -p <float>]" << "\n" << endl;
+	cout << "The three mandatory parameters are the xml file(-f), the threshold value(-t), and the corresponding mzml file(-m)." << endl; 
+	cout << "The optional parameters include the iprophet tag(-i), rtime search window(-r), and ppm threshold(-p). If not specified, the defaults are peptide prophet search, 2 min, and 10 ppm." << "\n" << endl;  
+	cout << "Some common errors: parameter tags are not correct, xml file and mzml file do not corresponding with each other, threshold value, rtime value, and/or ppm value out of bounds." << "\n" << endl; 
+	cout << "Consult documentation for further clarification." << endl; 
+
+	exit(1); 
+
+}
+
+
 void warnings(my_parameters& my_params) {
 
-	if (my_params.filename.end()[-1] != 'l') {
-		cout << "filename is incorrect or not found" << endl;
-		exit(1);
-	}
+	//if (my_params.filename.end()[-1] != 'l') {
+	//	cout << "Error: xml and/or mzml filename is incorrect or not found. Consult documentation." << endl;
+	//	info_description();
+	//	/*exit(1);*/
+	//}
+	//if (my_params.mzml.end()[-1] != 'l') {
+	//	cout << "Error: xml and/or mzml filename is incorrect or not found. Consult documentation." << endl;
+	//	info_description();
+	//	/*exit(1);*/
+	//}
 
 	switch (my_params.ident) {
 	case 'a':
 		if (my_params.ipro_prob < 0 || my_params.ipro_prob > 1) {
-			cout << "threshold iprophet probability value invalid" << endl;
-			exit(1);
+			cout << "Error: threshold iprophet probability value invalid. Consult documentation." << endl;
+			info_description();
+			/*exit(1);*/
 		}
 		if (my_params.ipro_prob < 0.9) {
 			char ans;
@@ -137,8 +163,9 @@ void warnings(my_parameters& my_params) {
 		break;
 	case 'b':
 		if (my_params.pep_prob < 0 || my_params.pep_prob > 1) {
-			cout << "threshold peptide probability value invalid" << endl;
-			exit(1);
+			cout << "Error: threshold peptide probability value invalid. Consult documentation." << endl;
+			info_description();
+			/*exit(1);*/
 		}
 		if (my_params.pep_prob < 0.9) {
 			char ans;
@@ -164,11 +191,6 @@ void warnings(my_parameters& my_params) {
 
 int main(int argc, char* argv[])
 {
-
-  //TODO: Add usage statement
-  if(argc==1){
-  }
-
 
 	deep_functions my_deep_functions;
 	scan_reader sr;
