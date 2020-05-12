@@ -51,6 +51,7 @@ bool protein_reader::prot_stats(peptide_lists& my_peptide_lists) {
 		my_peptide_lists.prot_f.back().missPeptides = index_counter(my_peptide_lists.prot_f_real[i], m);
 		my_peptide_lists.prot_f.back().sumTryp = prot_calc(my_peptide_lists.prot_f_real[i], f);
 		my_peptide_lists.prot_f.back().percentMiss = my_peptide_lists.prot_f.back().sumMiss / (my_peptide_lists.prot_f.back().sumMiss + my_peptide_lists.prot_f.back().sumTryp); 
+		my_peptide_lists.prot_f.back().total = my_peptide_lists.prot_f.back().sumMiss + my_peptide_lists.prot_f.back().sumTryp; 
 	}
 
 	

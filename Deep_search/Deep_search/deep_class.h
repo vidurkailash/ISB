@@ -66,8 +66,8 @@ public:
 class deep_functions {
 public:
 	peptide_lists xml_parse(my_parameters& my_params);
-	bool tryptic_calc(peptide_lists& my_peptide_lists);
-	bool miss_cleave(peptide_lists& my_peptide_lists);
+	bool tryptic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params);
+	bool miss_cleave(peptide_lists& my_peptide_lists, my_parameters& my_params);
 	bool delete_dup(peptide_lists& my_peptide_lists);
 	bool reader(peptide_lists& my_peptide_lists, metrics& my_metrics);
 	metrics calc(peptide_lists& my_peptide_lists, metrics& my_metrics);
@@ -88,7 +88,7 @@ private:
 	}
 	static bool compareTrypIndex(const dsPair& a, const dsPair& b) { return a.trypIndex < b.trypIndex; }
 	static bool compareMissIndex(const dsPair& a, const dsPair& b) { return a.missIndex < b.missIndex; }
-	static bool comparePercentMiss(const dsProtein& a, const dsProtein& b) { return a.percentMiss < b.percentMiss;  }
+	static bool compareTotal(const dsProtein& a, const dsProtein& b) { return a.total > b.total;  }
 }; 
 
 

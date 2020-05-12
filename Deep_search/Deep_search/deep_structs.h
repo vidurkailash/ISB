@@ -36,6 +36,7 @@ typedef struct dsPeptide {
   std::vector<dsXIC> XIC;  //stands for eXtracted Ion Chromatogram
   double areaXIC;
   double tolerance; 
+  int index; 
 } dsPeptide;
 
 //MH: New suggested data structure
@@ -58,6 +59,7 @@ typedef struct dsProtein {
 	float sumTryp;
 	float sumMiss;
 	float percentMiss;
+	float total; 
 } dsProtein;
 
 
@@ -75,7 +77,8 @@ typedef struct parameters {
 	std::string mzml; //spectra file
 	float run_time; 
 	double ppm; 
-
+	std::string cleave_loc;
+	std::string anti_cleave_loc; 
 
 } my_parameters;
 
@@ -203,6 +206,7 @@ typedef struct metrics {
 	float stdv_final; 
 	float protein_final; 
 	float protein_stdv; 
+	float total_intensity; 
 
 } my_metrics;
 
