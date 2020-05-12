@@ -30,7 +30,10 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	string input_mzml = "spec";
 	float input_rtime = 2; 
 	double input_ppm = 10; 
-
+	string input_loc = "KR"; 
+	string input_anti_loc = "P"; 
+	
+ 
     my_parameters my_params;
 
   //MH: set default values
@@ -80,6 +83,16 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				input_ppm = (float)atof(argv[++i]);
 		    }
 		}
+		else if (string(argv[i]) == "--loc" || string(argv[i]) == "-c") {
+			if (i + 1 < argc) {
+				input_loc = string(argv[++i]);
+			}
+		}
+		else if (string(argv[i]) == "--anti" || string(argv[i]) == "-a") {
+			if (i + 1 < argc) {
+				input_anti_loc = string(argv[++i]);
+			}
+		}
 
 		/*else {
 			cout << "one or more parameters entered are invalid, please consult documentation and re-enter valid parameters" << endl;
@@ -110,6 +123,9 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	my_params.mzml = input_mzml; 
 	my_params.run_time = input_rtime;
 	my_params.ppm = input_ppm; 
+	input_loc.push_back('-'); 
+	my_params.cleave_loc = input_loc; 
+	my_params.anti_cleave_loc = input_anti_loc;
 
 	return my_params;
 
@@ -120,9 +136,9 @@ void info_description() {
 	
 	cout << "QUICK TUTORIAL" << "\n" << endl; 
 	cout << "Example:" << endl; 
-	cout << ">deep_search_run.exe -f <file.pep.xml> -t <0-1> -m <file.mzml> [-i -r <float> -p <float>]" << "\n" << endl;
+	cout << ">deep_search_run.exe -f <file.pep.xml> -t <0-1> -m <file.mzml> [-i -r <float> -p <float> -c <string> -a <string> ]" << "\n" << endl;
 	cout << "The three mandatory parameters are the xml file(-f), the threshold value(-t), and the corresponding mzml file(-m)." << endl; 
-	cout << "The optional parameters include the iprophet tag(-i), rtime search window(-r), and ppm threshold(-p). If not specified, the defaults are peptide prophet search, 2 min, and 10 ppm." << "\n" << endl;  
+	cout << "The optional parameters include the iprophet tag(-i), rtime search window(-r), ppm threshold(-p), cleave sites (-c), and their exceptions (-a). If not specified, the defaults are peptide prophet search, 2 min, 10 ppm, K/R, and P." << "\n" << endl;  
 	cout << "Some common errors: parameter tags are not correct, xml file and mzml file do not corresponding with each other, threshold value, rtime value, and/or ppm value out of bounds." << "\n" << endl; 
 	cout << "Consult documentation for further clarification." << endl; 
 
@@ -212,14 +228,17 @@ int main(int argc, char* argv[])
 
 	
   //Count the tryptic and non-tryptic PSMs
-	if(my_deep_functions.tryptic_calc(my_peptide_lists)){
+	if(my_deep_functions.tryptic_calc(my_peptide_lists, my_params)){
     cout << my_peptide_lists.tryptic_real.size() << " tryptic PSMs, and " << my_peptide_lists.non_tryptic_real.size() << " non-tryptic PSMs" << endl;
   } else {
     //Right now, the function can never return false
   }
 	
+	
+	
+
   //Count the miscleaved PSMs
-  if(my_deep_functions.miss_cleave(my_peptide_lists)){
+  if(my_deep_functions.miss_cleave(my_peptide_lists, my_params)){
     int mc=0;
     for(size_t i=0;i<my_peptide_lists.tryptic_real.size();i++){
       if(my_peptide_lists.tryptic_real[i].miss_cleaves>0) mc++;
@@ -231,8 +250,6 @@ int main(int argc, char* argv[])
 
  
 
-
-	cout << my_peptide_lists.all_real.size() << endl; 
 
 	if(my_deep_functions.delete_dup(my_peptide_lists)){
     cout << my_peptide_lists.tryp_unique_z_real.size() << " unique tryptic PSMs." << endl;
