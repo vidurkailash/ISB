@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClInclude Include="deep_class.h" />
     <ClInclude Include="deep_structs.h" />
+    <ClInclude Include="protein_reader.h" />
     <ClInclude Include="rapidxml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="deep_class.cpp" />
+    <ClCompile Include="protein_reader.cpp" />
     <ClCompile Include="scan_reader.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
