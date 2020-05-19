@@ -125,6 +125,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	my_params.ppm = input_ppm; 
 	input_loc.push_back('-'); 
 	my_params.cleave_loc = input_loc; 
+	my_params.hyphen = "-"; 
 	my_params.anti_cleave_loc = input_anti_loc;
 
 	return my_params;
@@ -229,7 +230,7 @@ int main(int argc, char* argv[])
 	
   //Count the tryptic and non-tryptic PSMs
 	if(my_deep_functions.tryptic_calc(my_peptide_lists, my_params)){
-    cout << my_peptide_lists.tryptic_real.size() << " tryptic PSMs, and " << my_peptide_lists.non_tryptic_real.size() << " non-tryptic PSMs" << endl;
+    //cout << my_peptide_lists.tryptic_real.size() << " tryptic PSMs, and " << my_peptide_lists.non_tryptic_real.size() << " non-tryptic PSMs" << endl;
   } else {
     //Right now, the function can never return false
   }
