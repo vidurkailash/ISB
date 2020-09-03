@@ -31,7 +31,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	float input_rtime = 2; 
 	double input_ppm = 10; 
 	string input_loc = "KR"; 
-	string input_anti_loc = "P"; 
+	string input_anti_loc = "P";
 	
  
     my_parameters my_params;
@@ -93,6 +93,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 				input_anti_loc = string(argv[++i]);
 			}
 		}
+		
 
 		/*else {
 			cout << "one or more parameters entered are invalid, please consult documentation and re-enter valid parameters" << endl;
@@ -140,7 +141,7 @@ void info_description() {
 	cout << ">deep_search_run.exe -f <file.pep.xml> -t <0-1> -m <file.mzml> [-i -r <float> -p <float> -c <string> -a <string> ]" << "\n" << endl;
 	cout << "The three mandatory parameters are the xml file(-f), the threshold value(-t), and the corresponding mzml file(-m)." << endl; 
 	cout << "The optional parameters include the iprophet tag(-i), rtime search window(-r), ppm threshold(-p), cleave sites (-c), and their exceptions (-a). If not specified, the defaults are peptide prophet search, 2 min, 10 ppm, K/R, and P." << "\n" << endl;  
-	cout << "Some common errors: parameter tags are not correct, xml file and mzml file do not corresponding with each other, threshold value, rtime value, and/or ppm value out of bounds." << "\n" << endl; 
+	cout << "Some common errors: parameter tags are not correct, xml file and mzml file do not correspond with each other, threshold value, rtime value, and/or ppm value out of bounds." << "\n" << endl; 
 	cout << "Consult documentation for further clarification." << endl; 
 
 	exit(1); 
@@ -220,7 +221,61 @@ int main(int argc, char* argv[])
 	peptide_lists my_peptide_lists;
 	
 	metrics my_metrics;
-	
+
+	//vector<string> tmp; 
+	//tmp.push_back("REPTIDE");
+	//tmp.push_back("REPTRIDEK");
+	//tmp.push_back("REPTIDE");
+	//tmp.push_back("EPTRIDER");
+
+	//int c = 0;
+
+	//for (size_t i = 0; i < tmp.size(); i++) {
+	//	size_t found = my_params.cleave_loc.find(tmp[i][0]);
+	//	size_t found1 = my_params.cleave_loc.find(tmp[i].back());
+	//	//size_t found2 = my_params.hyphen.find(my_peptide_lists.all_real[i].next_aa);
+	//	if (found != string::npos || (found1 != string::npos /*|| found2 != string::npos*/)) {
+
+	//		/*my_peptide_lists.semi_tryptic_real.push_back(dsPeptide());
+	//		my_peptide_lists.semi_tryptic_real[c].pep_seq = my_peptide_lists.all_real[i].pep_seq;
+	//		my_peptide_lists.semi_tryptic_real[c].charge = my_peptide_lists.all_real[i].charge;
+	//		my_peptide_lists.semi_tryptic_real[c].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
+	//		my_peptide_lists.semi_tryptic_real[c].prev_aa = my_peptide_lists.all_real[i].prev_aa;
+	//		my_peptide_lists.semi_tryptic_real[c].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
+	//		my_peptide_lists.semi_tryptic_real[c].next_aa = my_peptide_lists.all_real[i].next_aa;
+	//		my_peptide_lists.semi_tryptic_real[c].prot_seq = my_peptide_lists.all_real[i].prot_seq;
+	//		my_peptide_lists.semi_tryptic_real[c].proteotypic = my_peptide_lists.all_real[i].proteotypic;
+	//		my_peptide_lists.semi_tryptic_real[c].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
+
+	//		c++;*/
+	//		cout << tmp[i] << endl; 
+	//	}
+	//}
+
+	//for (int i = 0; i < tmp.size(); i++) {
+	//	size_t found = my_params.cleave_loc.find(tmp[i][0]);
+	//	size_t found1 = my_params.cleave_loc.find(tmp[i].back());
+	//	/*size_t found2 = my_params.hyphen.find(my_peptide_lists.semi_tryptic_real[i].next_aa);*/
+	//	if (found != string::npos && (found1 != string::npos /*|| found2 != string::npos*/)) {
+	//		if (i == 0) {
+	//			tmp.erase(tmp.begin() + i);
+	//			i = 0;
+	//		}
+	//		if (i != 0) {
+	//			tmp.erase(tmp.begin() + i);
+	//			i = i - 1;
+	//		}
+	//	}
+
+	//}
+	//for (int i = 0; i < tmp.size(); i++) {
+	//	cout << tmp[i] << endl; 
+	//}
+
+	cout << "XML File: " << my_params.filename << endl; 
+	cout << "MZML File: " << my_params.mzml << endl; 
+
+
   //Parse the pepXML file and return a list of PSMs
   my_peptide_lists = my_deep_functions.xml_parse(my_params);
 	cout << "XML parsed, " << my_peptide_lists.all_real.size() << " of " << my_peptide_lists.total << " PSMs above probability threshold." << endl; 
@@ -235,8 +290,8 @@ int main(int argc, char* argv[])
     //Right now, the function can never return false
   }
 	
-	
-	
+	if(my_deep_functions.semi_tryptic_calc(my_peptide_lists, my_params)){}
+	else {}
 
   //Count the miscleaved PSMs
   if(my_deep_functions.miss_cleave(my_peptide_lists, my_params)){
@@ -245,6 +300,11 @@ int main(int argc, char* argv[])
       if(my_peptide_lists.tryptic_real[i].miss_cleaves>0) mc++;
     }
     cout << mc << " of " << my_peptide_lists.tryptic_real.size() << " tryptic PSMs are miscleaved." << endl;
+	mc = 0; 
+	for (size_t i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+		if (my_peptide_lists.semi_tryptic_real[i].miss_cleaves > 0) mc++;
+	}
+	cout << mc << " of " << my_peptide_lists.semi_tryptic_real.size() << " semi-tryptic PSMs are miscleaved." << endl;
   } else {
     //Right now, the function can never return false
   }
@@ -254,9 +314,12 @@ int main(int argc, char* argv[])
 
 	if(my_deep_functions.delete_dup(my_peptide_lists)){
     cout << my_peptide_lists.tryp_unique_z_real.size() << " unique tryptic PSMs." << endl;
-    cout << my_peptide_lists.tryp_unique_real.size() << " are unique tryptic peptides," << endl;
+	cout << my_peptide_lists.semi_tryptic_unique_z_real.size() << " unique semi-tryptic PSMs." << endl; 
+    cout << my_peptide_lists.tryp_unique_real.size() << " are unique tryptic peptides." << endl;
     cout << "and " << my_peptide_lists.miss_unique_real.size() << " of those have miscleavages." << endl;
+	cout << my_peptide_lists.semi_tryptic_unique_real.size() << " are unique semi-tryptic peptides." << endl;
 	} 
+
 	else {
     //Right now, the function can never return false
 	}
@@ -298,6 +361,14 @@ int main(int argc, char* argv[])
 	my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
 		
 	my_deep_functions.print(my_peptide_lists, my_metrics); 
+	my_deep_functions.json(my_peptide_lists);
+
+	/*for (int i = 0; i < my_peptide_lists.prot_f.size(); i++) {
+		for (int j = 0; j < my_peptide_lists.prot_f[i].trypPeptides.size(); j++) {
+			cout << my_peptide_lists.prot_f[i].trypPeptides[j] << endl;
+		}
+		cout << "--NEXT--" << endl; 
+	}*/
 
 	return 0;
 
