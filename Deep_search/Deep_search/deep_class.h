@@ -36,13 +36,17 @@ public:
 	std::vector<dsPeptide> all_real; 
 	std::vector<dsPeptide> tryptic_real;
 	std::vector<dsPeptide> non_tryptic_real;
+	std::vector<dsPeptide> semi_tryptic_real; 
 	std::vector<dsPeptide> tryp_unique_z_real;
+	std::vector<dsPeptide> semi_tryptic_unique_z_real;
 	std::vector<dsPeptide> tryp_unique_real;
 	std::vector<dsPeptide> miss_unique_real;
+	std::vector<dsPeptide> semi_tryptic_unique_real;
 	std::vector<dsPeptide> fully_tryp_unique_real;
 
 	std::vector<dsPeptide> xic_ft_results;
 	std::vector<dsPeptide> xic_mc_results; 
+	std::vector<dsPeptide> xic_st_results; 
 	
 	std::vector<dsPair> peptide_matches; 
 	std::vector<dsPair> peptide_matches1;
@@ -67,6 +71,7 @@ class deep_functions {
 public:
 	peptide_lists xml_parse(my_parameters& my_params);
 	bool tryptic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params);
+	bool semi_tryptic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params);
 	bool miss_cleave(peptide_lists& my_peptide_lists, my_parameters& my_params);
 	bool delete_dup(peptide_lists& my_peptide_lists);
 	bool reader(peptide_lists& my_peptide_lists, metrics& my_metrics);
@@ -78,6 +83,7 @@ public:
 	bool cleanNoise(std::vector<dsXIC>& v);
 	float calcPeakArea(std::vector<dsXIC>& v);
 	void print(peptide_lists& my_peptide_lists, metrics& my_metrics);
+	void json(peptide_lists& my_peptide_lists); 
 
 private: 
 	static bool compareInten(const dsPair& a, const dsPair& b) { return a.ft_areaXIC > b.ft_areaXIC; };

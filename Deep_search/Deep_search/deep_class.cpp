@@ -1,8 +1,13 @@
 #include "rapidxml.hpp"
 #include "deep_class.h"
+#include "rapidjson/document.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
+
 
 using namespace rapidxml;
 using namespace std;
+using namespace rapidjson;
 
 
 
@@ -104,11 +109,13 @@ bool deep_functions::tryptic_calc(peptide_lists& my_peptide_lists, my_parameters
     //NEW METHOD
     int c = 0;
     int d = 0;
+    int e = 0; 
 
     for (size_t i = 0; i < my_peptide_lists.all_real.size(); i++) {
         size_t found = my_params.cleave_loc.find(my_peptide_lists.all_real[i].prev_aa);
         size_t found1 = my_params.cleave_loc.find(my_peptide_lists.all_real[i].pep_seq.back());
-        if (found!= string::npos && found1!=string::npos) {
+        size_t found2 = my_params.hyphen.find(my_peptide_lists.all_real[i].next_aa);
+        if (found!= string::npos && (found1!=string::npos || found2!=string::npos)) {
 
             my_peptide_lists.tryptic_real.push_back(dsPeptide());
             my_peptide_lists.tryptic_real[c].pep_seq = my_peptide_lists.all_real[i].pep_seq;
@@ -123,6 +130,7 @@ bool deep_functions::tryptic_calc(peptide_lists& my_peptide_lists, my_parameters
 
             c++;
         }
+        
         else {
 
             my_peptide_lists.non_tryptic_real.push_back(dsPeptide());
@@ -142,48 +150,76 @@ bool deep_functions::tryptic_calc(peptide_lists& my_peptide_lists, my_parameters
 
 
 
-   
-    //OLD METHOD
-    /*for (size_t i = 0; i < my_peptide_lists.all_real.size(); i++) {
-        if ((my_peptide_lists.all_real[i].prev_aa == "R" || my_peptide_lists.all_real[i].prev_aa == "K" || my_peptide_lists.all_real[i].prev_aa == "-") &&
-            (my_peptide_lists.all_real[i].pep_seq.back() == 'R' || my_peptide_lists.all_real[i].pep_seq.back() == 'K' || my_peptide_lists.all_real[i].next_aa == "-")) {
-
-            my_peptide_lists.tryptic_real.push_back(dsPeptide());
-            my_peptide_lists.tryptic_real[c].pep_seq = my_peptide_lists.all_real[i].pep_seq;
-            my_peptide_lists.tryptic_real[c].charge = my_peptide_lists.all_real[i].charge;
-            my_peptide_lists.tryptic_real[c].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
-            my_peptide_lists.tryptic_real[c].prev_aa = my_peptide_lists.all_real[i].prev_aa;
-            my_peptide_lists.tryptic_real[c].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
-            my_peptide_lists.tryptic_real[c].next_aa = my_peptide_lists.all_real[i].next_aa;
-            my_peptide_lists.tryptic_real[c].prot_seq = my_peptide_lists.all_real[i].prot_seq;
-            my_peptide_lists.tryptic_real[c].proteotypic = my_peptide_lists.all_real[i].proteotypic;
-            my_peptide_lists.tryptic_real[c].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
-
-            c++;
-        }
-        else {
-
-            my_peptide_lists.non_tryptic_real.push_back(dsPeptide());
-            my_peptide_lists.non_tryptic_real[d].pep_seq = my_peptide_lists.all_real[i].pep_seq;
-            my_peptide_lists.non_tryptic_real[d].charge = my_peptide_lists.all_real[i].charge;
-            my_peptide_lists.non_tryptic_real[d].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
-            my_peptide_lists.non_tryptic_real[d].prev_aa = my_peptide_lists.all_real[i].prev_aa;
-            my_peptide_lists.non_tryptic_real[d].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
-            my_peptide_lists.non_tryptic_real[d].next_aa = my_peptide_lists.all_real[i].next_aa;
-            my_peptide_lists.non_tryptic_real[d].prot_seq = my_peptide_lists.all_real[i].prot_seq;
-            my_peptide_lists.non_tryptic_real[d].proteotypic = my_peptide_lists.all_real[i].proteotypic;
-            my_peptide_lists.non_tryptic_real[d].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
-
-            d++;
-        }
-    }*/
-
-
-
-
     return true;
 
 }
+
+bool deep_functions::semi_tryptic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params) {
+
+    int c = 0;
+    for (size_t i = 0; i < my_peptide_lists.all_real.size(); i++) {
+        size_t found = my_params.cleave_loc.find(my_peptide_lists.all_real[i].prev_aa);
+        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.all_real[i].pep_seq.back());
+        size_t found2 = my_params.hyphen.find(my_peptide_lists.all_real[i].next_aa);
+        if (found != string::npos || (found1 != string::npos || found2 != string::npos)) {
+
+            my_peptide_lists.semi_tryptic_real.push_back(dsPeptide());
+            my_peptide_lists.semi_tryptic_real[c].pep_seq = my_peptide_lists.all_real[i].pep_seq;
+            my_peptide_lists.semi_tryptic_real[c].charge = my_peptide_lists.all_real[i].charge;
+            my_peptide_lists.semi_tryptic_real[c].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
+            my_peptide_lists.semi_tryptic_real[c].prev_aa = my_peptide_lists.all_real[i].prev_aa;
+            my_peptide_lists.semi_tryptic_real[c].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
+            my_peptide_lists.semi_tryptic_real[c].next_aa = my_peptide_lists.all_real[i].next_aa;
+            my_peptide_lists.semi_tryptic_real[c].prot_seq = my_peptide_lists.all_real[i].prot_seq;
+            my_peptide_lists.semi_tryptic_real[c].proteotypic = my_peptide_lists.all_real[i].proteotypic;
+            my_peptide_lists.semi_tryptic_real[c].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
+
+            c++;
+        }
+    }
+
+  
+    for (int i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+        size_t found = my_params.cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].prev_aa);
+        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].pep_seq.back());
+        size_t found2 = my_params.hyphen.find(my_peptide_lists.semi_tryptic_real[i].next_aa);
+        if (found != string::npos && (found1 != string::npos || found2 != string::npos)) {
+            if (i == 0) {
+                my_peptide_lists.semi_tryptic_real.erase(my_peptide_lists.semi_tryptic_real.begin() + i);
+                i = 0;
+            }
+            if (i != 0) {
+                my_peptide_lists.semi_tryptic_real.erase(my_peptide_lists.semi_tryptic_real.begin() + i);
+                i = i - 1; 
+            }
+        }
+
+    }
+
+    my_peptide_lists.semi_tryptic_real.erase(my_peptide_lists.semi_tryptic_real.begin());
+
+
+    for (int i = 0; i < my_peptide_lists.non_tryptic_real.size(); i++) {
+        for (int j = 0; j < my_peptide_lists.semi_tryptic_real.size(); j++) {
+            if (my_peptide_lists.non_tryptic_real[i].pep_seq == my_peptide_lists.semi_tryptic_real[j].pep_seq && i == 0) {
+                my_peptide_lists.non_tryptic_real.erase(my_peptide_lists.non_tryptic_real.begin() + i);
+                i = 0;
+            }
+            if (my_peptide_lists.non_tryptic_real[i].pep_seq == my_peptide_lists.semi_tryptic_real[j].pep_seq && i != 0) {
+                my_peptide_lists.non_tryptic_real.erase(my_peptide_lists.non_tryptic_real.begin() + i);
+                i = i - 1; 
+            }
+        }
+    }
+
+    /*for (int i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+        cout << my_peptide_lists.semi_tryptic_real[i].prev_aa << "  " << my_peptide_lists.semi_tryptic_real[i].pep_seq << "  " << my_peptide_lists.semi_tryptic_real[i].next_aa << endl; 
+    }*/
+
+
+    return true; 
+}
+
 
 bool deep_functions::miss_cleave(peptide_lists& my_peptide_lists, my_parameters& my_params) {
 
@@ -200,24 +236,59 @@ bool deep_functions::miss_cleave(peptide_lists& my_peptide_lists, my_parameters&
         my_peptide_lists.tryptic_real[i].miss_cleaves = c;
         c = 0;
     }
+
+    int d = 0;
+    for (int i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+        for (int j = 0; j < my_peptide_lists.semi_tryptic_real[i].pep_seq.size() - 1; j++) {
+            size_t found = my_params.cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].pep_seq[j]);
+            size_t found1 = my_params.anti_cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].pep_seq[j + 1]);
+            if (found != string::npos && found1 == string::npos) {
+                d++;
+            }
+        }
+        my_peptide_lists.semi_tryptic_real[i].miss_cleaves = d;
+        d = 0;
+    }
     
-    
-    //OLD METHOD 
-    /*int c = 0;
-    for (int i = 0; i < my_peptide_lists.tryptic_real.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.tryptic_real[i].pep_seq.size() - 1; j++) {
-            int k = j + 1;
-            if ((my_peptide_lists.tryptic_real[i].pep_seq[j] == 'K' || my_peptide_lists.tryptic_real[i].pep_seq[j] == 'R') && my_peptide_lists.tryptic_real[i].pep_seq[k] != 'P') {
+    //TEST
+   /* c = 0; 
+    for (int i = 0; i < my_peptide_lists.all_real.size(); i++) {
+        for (int j = 0; j < my_peptide_lists.all_real[i].pep_seq.size() - 1; j++) {
+            size_t found5 = my_params.cleave_loc.find(my_peptide_lists.all_real[i].pep_seq[j]);
+            size_t found6 = my_params.anti_cleave_loc.find(my_peptide_lists.all_real[i].pep_seq[j + 1]);
+            if (found5 != string::npos && found6 == string::npos) {
                 c++;
             }
         }
-        my_peptide_lists.tryptic_real[i].miss_cleaves = c;
+        my_peptide_lists.all_real[i].miss_cleaves = c;
         c = 0;
-    }*/
+    }
+    int zero = 0; 
+    int one = 0;
+    int two = 0; 
+
+    for (int i = 0; i < my_peptide_lists.all_real.size(); i++) {
+        if (my_peptide_lists.all_real[i].miss_cleaves == 0) {
+            cout << my_peptide_lists.all_real[i].pep_seq << "  " << my_peptide_lists.all_real[i].prev_aa << "  " << my_peptide_lists.all_real[i].next_aa << endl; 
+            zero++; 
+        }
+        if (my_peptide_lists.all_real[i].miss_cleaves == 1) {
+            one++; 
+        }
+        if (my_peptide_lists.all_real[i].miss_cleaves == 2) {
+            two++;
+        }
+    }
+
+    cout << zero << "  " << one << "  " << two << endl; */
 
     return true;
 
 }
+
+
+
+
 
 bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
 
@@ -226,6 +297,7 @@ bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
 
     //Sort the tryptic array by sequence and then charge state
     sort(my_peptide_lists.tryptic_real.begin(), my_peptide_lists.tryptic_real.end(), compareSeqZ);
+    
 
     //Iterate over all tryptic PSMs, keeping each unique instance of sequence and charge
     my_peptide_lists.tryp_unique_z_real.push_back(my_peptide_lists.tryptic_real[0]);
@@ -235,12 +307,15 @@ bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
         my_peptide_lists.tryp_unique_z_real.push_back(my_peptide_lists.tryptic_real[i]);
     }
 
+
     //Repeat the process, keeping each unique instance of sequence;
     my_peptide_lists.tryp_unique_real.push_back(my_peptide_lists.tryptic_real[0]);
     for (i = 1; i < my_peptide_lists.tryptic_real.size(); i++) {
         if (my_peptide_lists.tryp_unique_real.back().pep_seq.compare(my_peptide_lists.tryptic_real[i].pep_seq) == 0) continue;
         my_peptide_lists.tryp_unique_real.push_back(my_peptide_lists.tryptic_real[i]);
     }
+
+  
 
     //Now of the unique peptide sequences, make a subset of miscleaved peptides
     i = 0;
@@ -257,7 +332,25 @@ bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
     }
 
 
+    if (my_peptide_lists.semi_tryptic_real.size() > 0) {
+        sort(my_peptide_lists.semi_tryptic_real.begin(), my_peptide_lists.semi_tryptic_real.end(), compareSeqZ);
 
+        //semi tryptic 
+        my_peptide_lists.semi_tryptic_unique_z_real.push_back(my_peptide_lists.semi_tryptic_real[0]);
+        for (i = 1; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+            if (my_peptide_lists.semi_tryptic_unique_z_real.back().pep_seq.compare(my_peptide_lists.semi_tryptic_real[i].pep_seq) == 0 &&
+                my_peptide_lists.semi_tryptic_unique_z_real.back().charge == my_peptide_lists.semi_tryptic_real[i].charge) continue;
+            my_peptide_lists.semi_tryptic_unique_z_real.push_back(my_peptide_lists.semi_tryptic_real[i]);
+        }
+
+        // semi tryptic 
+        my_peptide_lists.semi_tryptic_unique_real.push_back(my_peptide_lists.semi_tryptic_real[0]);
+        for (i = 1; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+            if (my_peptide_lists.semi_tryptic_unique_real.back().pep_seq.compare(my_peptide_lists.semi_tryptic_real[i].pep_seq) == 0) continue;
+            my_peptide_lists.semi_tryptic_unique_real.push_back(my_peptide_lists.semi_tryptic_real[i]);
+        }
+
+    }
     return true;
 
 }
@@ -279,6 +372,10 @@ bool deep_functions::lcd(peptide_lists& my_peptide_lists, my_parameters& my_para
         my_peptide_lists.miss_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.miss_unique_real[i].calc_neutral_mass;
     }
 
+    for (size_t i = 0; i < my_peptide_lists.semi_tryptic_unique_real.size(); i++) {
+        my_peptide_lists.semi_tryptic_unique_real[i].xml_mz = (my_peptide_lists.semi_tryptic_unique_real[i].pre_neutral_mass + (my_peptide_lists.semi_tryptic_unique_real[i].charge * 1.00727)) / my_peptide_lists.semi_tryptic_unique_real[i].charge;
+        my_peptide_lists.semi_tryptic_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.semi_tryptic_unique_real[i].calc_neutral_mass;
+    }
 
 
 
@@ -461,11 +558,6 @@ bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics
 
     cout << "intensity calculated" << "\n" << endl;
 
-
-
-    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
-
-    }
 
 
 
@@ -1205,71 +1297,40 @@ float deep_functions::calcPeakArea(std::vector<dsXIC>& v){
 void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics) {
 
 
-    cout << "\n" << "----------- XML DATA -----------" << "\n" << endl;
-    cout << "-- SANTIY CHECKS --" << "\n" << endl;
-    cout << "Total PSM in file:\t\t\t\t\t\t\t\t" << my_metrics.total_psm << "\n" << endl;
-    cout << "# of PSM above entered threshold value:\t\t\t\t\t\t" << my_metrics.psm_num << "\n" << endl;
-    cout << "# of tryptic PSM above entered threshold value:\t\t\t\t\t" << my_metrics.tryptic_num << "\n" << endl;
-    cout << "# of non tryptic PSM above entered threshold value:\t\t\t\t" << my_metrics.nontryptic_num << "\n" << endl;
-    cout << "Tryptic peptides with unique charges:\t\t\t\t\t\t" << my_metrics.unique_pep_charge << "\n" << endl;
-    cout << "Tryptic peptides with unique sequences:\t\t\t\t\t\t" << my_metrics.unique_peptides << "\n" << endl;
-    cout << "Avg seuqnce length of unique tryptic peptide:\t\t\t\t\t" << my_metrics.avg_pep_length << "\n" << endl;
-    cout << "Tryptic psm / psm above threshold:\t\t\t\t\t\t" << my_metrics.tryp_frac << "\n" << endl;
-    cout << "Non tryptic psm / psm above threshold:\t\t\t\t\t\t" << my_metrics.nontryp_frac << "\n" << endl;
-    cout << "Unique peptides / psm above threshold:\t\t\t\t\t\t" << my_metrics.pep_frac << "\n" << endl;
-    cout << "Avg # of misscleaves per unique peptide that is misclevaed:\t\t\t" << my_metrics.miss_cleave_avg << "\n" << endl;
-
-    cout << "-- USEFUL STATS --" << "\n" << endl;
-    cout << "# of unique pepides that are miss cleaved:\t\t\t\t\t" << my_metrics.num_miss_cleave_pep << "\n" << endl;
-    cout << "# of total misscleaves amognst unique peptides:\t\t\t\t\t" << my_metrics.num_miss_cleave_total << "\n" << endl;
-    cout << "# of total misscleaves amongst unique peptides / total # of unique peptides:\t" << my_metrics.miss_cleave_rate_pep << "\n" << endl;
-    cout << "# of misscleaved tryptic psm above threshold: \t\t\t\t\t" << my_metrics.num_miss_cleave_psm << "\n" << endl;
-    cout << "# of total miss cleaves amongst tryptic psm:\t\t\t\t\t" << my_metrics.num_tot_miss_cleave_psm << "\n" << endl;
-    cout << "# of total misscleaves amongst tryptic psm / total # tryptic psm aove threshold:\t" << my_metrics.miss_cleave_rate_psm << "\n" << endl;
-    cout << "# of misscleaved unique peptides / total # of unique peptides:\t\t\t" << my_metrics.golden_stat_unique_pep << " ** " << "\n" << endl;
-    cout << "# of miss cleaved tryptic psm / total tryptic psm above threshold:\t\t" << my_metrics.golden_stat_psm << " ** " << "\n" << endl;
-
-    cout << "\n" << "---------- MZML DATA ---------" << "\n" << endl;
-    cout << "-- SANTIY CHECKS --" << "\n" << endl;
-    cout << "# of fully tryptic peptides found that has a match to a miscleaved peptide:\t" << my_metrics.find_num << "\n" << endl;
-    cout << "avg highest peak intensity for miscleaved peptide: \t\t\t\t" << my_metrics.miss_avg_high << "\n" << endl;
-    cout << "avg highest peak intensity for trypitc peptide: \t\t\t\t\t" << my_metrics.tryp_avg_high << "\n" << endl;
-    cout << "# of miscleaved peptides that have fully tryptic matches that have 2 miscleaves:\t " << my_metrics.twice_mc << "\n" << endl;
-    cout << "# of miscleaved peptides that have fully tryptic matches that have 1 miscleave:\t " << my_metrics.once_mc << "\n" << endl;
-
-    cout << "-- USEFUL STATS --" << "\n" << endl;
-    cout << "avg ratio of intensities: 0 miscleave full tryptic peptides / 1 or 2 miscleave peptides:\t" << my_metrics.intensity_final << " ** " << "\n" << endl;
-    cout << "stdv of ratio of intensities: \t\t\t\t\t\t\t\t" << my_metrics.stdv_final << " ** " << "\n" << endl;
-    cout << "total miscleaved peptide intensity / sum of all peptide intensities: \t\t" << my_metrics.total_intensity << " ** " << "\n" << endl; 
-
-
-
-
-    sort(my_peptide_lists.peptide_matches.begin(), my_peptide_lists.peptide_matches.end(), compareInten);
-
-
-    my_peptide_lists.peptide_matches1.push_back(my_peptide_lists.peptide_matches[0]);
-    for (size_t i = 1; i < my_peptide_lists.peptide_matches.size(); i++) {
-        if (my_peptide_lists.peptide_matches[i].ft_pep_seq == my_peptide_lists.peptide_matches[i - 1].ft_pep_seq) continue;
-        my_peptide_lists.peptide_matches1.push_back(my_peptide_lists.peptide_matches[i]);
-    }
-
-    cout << "\n" << "-- 20 TWENTY MOST ABUNDANT PEPTIDES --" << "\n" << endl;
-    my_peptide_lists.peptide_matches = my_peptide_lists.peptide_matches1;
-    if (my_peptide_lists.peptide_matches.size() < 20) {
-        for (size_t i = 0; i < my_peptide_lists.peptide_matches.size(); i++) {
-            cout << i+1 << ": " << my_peptide_lists.peptide_matches[i].mc_pep_seq << "  " << my_peptide_lists.peptide_matches[i].mc_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_pep_seq << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
-        }
-    }
-    else {
-        for (size_t i = 0; i < 20; i++) {
-            cout << i+1 << ": " << my_peptide_lists.peptide_matches[i].mc_pep_seq << "  " << my_peptide_lists.peptide_matches[i].mc_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_pep_seq << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC << "  " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
-        }
-    }
+    cout << "\n" << "----------- XML STATS -----------" << "\n" << endl;
+    cout << "Total PSM in file:\t\t\t\t\t\t\t\t\t\t" << my_metrics.total_psm << "\n" << endl;
+    cout << "# of PSM above entered threshold value:\t\t\t\t\t\t\t\t" << my_metrics.psm_num << "\n" << endl;
     
+    cout << "\n" << "----------- PEPTIDE STATS -----------" << "\n" << endl;
+    cout << "-- Sanity Checks --" << "\n" << endl;
+    cout << "# of tryptic PSM above entered threshold value:\t\t\t\t\t\t\t" << my_metrics.tryptic_num << "\n" << endl;
+    cout << "# of non tryptic PSM above entered threshold value:\t\t\t\t\t\t" << my_metrics.nontryptic_num << "\n" << endl;
+    cout << "Tryptic peptides with unique charges:\t\t\t\t\t\t\t\t" << my_metrics.unique_pep_charge << "\n" << endl;
+    cout << "Tryptic peptides with unique sequences:\t\t\t\t\t\t\t\t" << my_metrics.unique_peptides << "\n" << endl;
+    cout << "Avg seuqnce length of unique tryptic peptide:\t\t\t\t\t\t\t" << my_metrics.avg_pep_length << "\n" << endl;
+    cout << "Tryptic psm / psm above threshold:\t\t\t\t\t\t\t\t" << my_metrics.tryp_frac << "\n" << endl;
+    cout << "Non tryptic psm / psm above threshold:\t\t\t\t\t\t\t\t" << my_metrics.nontryp_frac << "\n" << endl;
+    cout << "Unique peptides / psm above threshold:\t\t\t\t\t\t\t\t" << my_metrics.pep_frac << "\n" << endl;
+    cout << "Avg # of misscleaves per unique peptide that is misclevaed:\t\t\t\t\t" << my_metrics.miss_cleave_avg << "\n" << endl;
+    cout << "# of fully tryptic peptides found that has a match to a miscleaved peptide:\t\t\t" << my_metrics.find_num << "\n" << endl;
+    cout << "avg highest peak intensity for miscleaved peptide: \t\t\t\t\t\t" << my_metrics.miss_avg_high << "\n" << endl;
+    cout << "avg highest peak intensity for trypitc peptide: \t\t\t\t\t\t" << my_metrics.tryp_avg_high << "\n" << endl;
+    cout << "# of miscleaved peptides that have fully tryptic matches that have 2 miscleaves:\t\t " << my_metrics.twice_mc << "\n" << endl;
+    cout << "# of miscleaved peptides that have fully tryptic matches that have 1 miscleave:\t\t\t " << my_metrics.once_mc << "\n" << endl;
 
+    cout << "-- Useful Stats --" << "\n" << endl;
+    cout << "# of unique pepides that are miss cleaved:\t\t\t\t\t\t\t" << my_metrics.num_miss_cleave_pep << "\n" << endl;
+    cout << "# of total misscleaves amognst unique peptides:\t\t\t\t\t\t\t" << my_metrics.num_miss_cleave_total << "\n" << endl;
+    cout << "# of total misscleaves amongst unique peptides / total # of unique peptides:\t\t\t" << my_metrics.miss_cleave_rate_pep << "\n" << endl;
+    cout << "# of misscleaved tryptic psm above threshold: \t\t\t\t\t\t\t" << my_metrics.num_miss_cleave_psm << "\n" << endl;
+    cout << "# of total miss cleaves amongst tryptic psm:\t\t\t\t\t\t\t" << my_metrics.num_tot_miss_cleave_psm << "\n" << endl;
+    cout << "# of total misscleaves amongst tryptic psm / total # tryptic psm above threshold:\t\t" << my_metrics.miss_cleave_rate_psm << "\n" << endl;
+    cout << "# of misscleaved unique peptides / total # of unique peptides:\t\t\t\t\t" << my_metrics.golden_stat_unique_pep << " ** " << "\n" << endl;
+    cout << "# of miss cleaved tryptic psm / total tryptic psm above threshold:\t\t\t\t" << my_metrics.golden_stat_psm << " ** " << "\n" << endl;
+    cout << "avg ratio of intensities: 0 miscleave full tryptic peptides / 1 or 2 miscleave peptides:\t" << my_metrics.intensity_final << " ** " << "\n" << endl;
+    cout << "stdv of ratio of intensities: \t\t\t\t\t\t\t\t\t" << my_metrics.stdv_final << " ** " << "\n" << endl;
+    cout << "Global Stat: total miscleaved peptide intensity / sum of all peptide intensities: \t\t" << my_metrics.total_intensity << " ** " << "\n" << endl;
    
-
     vector<float> rat;
     float rat1 = 0;
     for (size_t i = 0; i < my_peptide_lists.prot_f.size(); i++) {
@@ -1289,9 +1350,44 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
     my_metrics.protein_stdv = stdv;
 
 
-    cout << "\n" << "-- PROTEIN STATS --" << "\n" << endl;
+    cout << "\n" << "----------- PROTEIN STATS -----------" << "\n" << endl;
     cout << "avg percent miss within protein: misscleaved peptides sum intensity / total sum intensity:\t" << my_metrics.protein_final << " ** " << "\n" << endl;
-    cout << "stdv of percent miss: \t\t\t\t\t\t\t\t" << my_metrics.protein_stdv << " ** " << "\n" << endl;
+    cout << "stdv of percent miss: \t\t\t\t\t\t\t\t\t\t" << my_metrics.protein_stdv << " ** " << "\n" << endl;
+
+   
+    
+
+
+
+
+    sort(my_peptide_lists.peptide_matches.begin(), my_peptide_lists.peptide_matches.end(), compareInten);
+
+
+    my_peptide_lists.peptide_matches1.push_back(my_peptide_lists.peptide_matches[0]);
+    for (size_t i = 1; i < my_peptide_lists.peptide_matches.size(); i++) {
+        if (my_peptide_lists.peptide_matches[i].ft_pep_seq == my_peptide_lists.peptide_matches[i - 1].ft_pep_seq) continue;
+        my_peptide_lists.peptide_matches1.push_back(my_peptide_lists.peptide_matches[i]);
+    }
+
+    cout << "\n" << "-- 30 TWENTY MOST ABUNDANT PEPTIDES --" << "\n" << endl;
+    my_peptide_lists.peptide_matches = my_peptide_lists.peptide_matches1;
+    if (my_peptide_lists.peptide_matches.size() < 30) {
+        for (size_t i = 0; i < my_peptide_lists.peptide_matches.size(); i++) {
+            cout << i + 1 << ": " << " T sequence: " << my_peptide_lists.peptide_matches[i].ft_pep_seq << " || T intensity: " << my_peptide_lists.peptide_matches[i].ft_areaXIC << " || MC sequence: " << my_peptide_lists.peptide_matches[i].mc_pep_seq << " || MC intensity: " << my_peptide_lists.peptide_matches[i].mc_areaXIC << " || intensity ratio: " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
+        }
+    }
+    else {
+        for (size_t i = 0; i < 30; i++) {
+            cout << i + 1 << ": " << " T sequence: " << my_peptide_lists.peptide_matches[i].ft_pep_seq << " || T intensity: " << my_peptide_lists.peptide_matches[i].ft_areaXIC << " || MC sequence: " << my_peptide_lists.peptide_matches[i].mc_pep_seq << " || MC intensity: " << my_peptide_lists.peptide_matches[i].mc_areaXIC << " || intensity ratio: " << my_peptide_lists.peptide_matches[i].ft_areaXIC / my_peptide_lists.peptide_matches[i].mc_areaXIC << endl;
+        }
+    }
+    
+
+  
+
+   
+
+   
 
 
     sort(my_peptide_lists.prot_f.begin(), my_peptide_lists.prot_f.end(), compareTotal); 
@@ -1299,16 +1395,16 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
  
 
 
-    cout << "\n" << "-- 20 TWENTY MOST ABUNDANT PROTEINS--" << "\n" << endl;
+    cout << "\n" << "-- 50 TWENTY MOST ABUNDANT PROTEINS--" << "\n" << endl;
     
-    if (my_peptide_lists.prot_f.size() < 20) {
+    if (my_peptide_lists.prot_f.size() < 50) {
         for (size_t i = 0; i < my_peptide_lists.prot_f.size(); i++) {
-            cout << i + 1 << ": " << my_peptide_lists.prot_f[i].prot_seq << "  " << my_peptide_lists.prot_f[i].total << "  " << my_peptide_lists.prot_f[i].percentMiss <<  endl;
+            cout << i + 1 << ":  " << "Prot sequence: " <<  my_peptide_lists.prot_f[i].prot_seq << " || Tot intensity: " << my_peptide_lists.prot_f[i].total << " || amount MC peptides: " << my_peptide_lists.prot_f[i].percentMiss <<  endl;
         }
     }
     else {
-        for (size_t i = 0; i < 20; i++) {
-            cout << i + 1 << ": " << my_peptide_lists.prot_f[i].prot_seq << "  " << my_peptide_lists.prot_f[i].total << "  " << my_peptide_lists.prot_f[i].percentMiss << endl;
+        for (size_t i = 0; i < 50; i++) {
+            cout << i + 1 << ":  " << "Prot sequence: " << my_peptide_lists.prot_f[i].prot_seq << " || Tot intensity: " << my_peptide_lists.prot_f[i].total << " || amount MC peptides: " << my_peptide_lists.prot_f[i].percentMiss << endl;
         }
     }
 
@@ -1319,11 +1415,140 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
         }
     }
 
-    cout << "\n" << count << "  proteins out of " << my_peptide_lists.prot_f.size() << " are entirely made up of tryptic peptides" << endl; 
+    cout << "\n" << count << "  proteins out of " << my_peptide_lists.prot_f.size() << " are entirely made up of tryptic peptides" << "\n" << endl; 
 
    /* for (int i = 0; i < my_peptide_lists.prot_f.size(); i++) {
         cout << my_peptide_lists.prot_f[i].prot_seq << "   " << my_peptide_lists.prot_f[i].trypPeptides.size() << "   " << my_peptide_lists.prot_f[i].missPeptides.size() << "   " << my_peptide_lists.prot_f[i].sumTryp << "   " << my_peptide_lists.prot_f[i].sumMiss << "   " << my_peptide_lists.prot_f[i].percentMiss << endl;
     }*/
 
+
+
+
+
+
+
+    cout << "------------------------------------------------------------------" << endl; 
+
+    cout << "\n" << "*** MOST IMPORTANT DIAGNOSTIC METRICS ***" << "\n" << endl; 
+
+    cout << "-- PEPTIDE STATS --" << "\n" << endl; 
+    cout << "# of misscleaved unique peptides / total # of unique peptides:\t\t\t\t\t" << my_metrics.golden_stat_unique_pep << " ** " << "\n" << endl;
+    cout << "# of miss cleaved tryptic psm / total tryptic psm above threshold:\t\t\t\t" << my_metrics.golden_stat_psm << " ** " << "\n" << endl;
+    cout << "avg ratio of intensities: 0 miscleave full tryptic peptides / 1 or 2 miscleave peptides:\t" << my_metrics.intensity_final << " ** " << "\n" << endl;
+    cout << "stdv of ratio of intensities: \t\t\t\t\t\t\t\t\t" << my_metrics.stdv_final << " ** " << "\n" << endl;
+    cout << "Global Stat: total miscleaved peptide intensity / sum of all peptide intensities: \t\t" << my_metrics.total_intensity << " ** " << "\n" << endl;
+
+    cout << "\n" << "-- PROTEIN STATS --" << "\n" << endl;
+    cout << "avg percent miss within protein: misscleaved peptides sum intensity / total sum intensity:\t" << my_metrics.protein_final << " ** " << "\n" << endl;
+    cout << "stdv of percent miss: \t\t\t\t\t\t\t\t\t\t" << my_metrics.protein_stdv << " ** " << "\n" << endl;
+
+
+
+
+
+   /* for (size_t i = 0; i < my_peptide_lists.prot_f.size(); i++) {
+        cout << i + 1 << "-  " << "protein sequence- " << my_peptide_lists.prot_f[i].prot_seq << "    -      total intensity- " << my_peptide_lists.prot_f[i].total << "    -    amount made up of miss cleaved peptides- " << my_peptide_lists.prot_f[i].percentMiss << endl;
+    }*/
+
+
+
+
+  /*  for (int i = 0; i < 20; i++) {
+        cout << my_peptide_lists.prot_f[i].missPeptides.size();
+        cout << "  " << my_peptide_lists.prot_f[i].trypPeptides.size() << endl;
+       
+    }*/
+
+
+
   
+}
+
+void deep_functions::json(peptide_lists& my_peptide_lists) {
+    
+
+        StringBuffer s;
+        PrettyWriter<StringBuffer> writer(s);
+
+     
+        writer.StartObject();
+        for (int i = 0; i < 20 /*my_peptide_lists.prot_f.size()*/; i++) {
+            writer.StartObject();
+            writer.Key("Protein Name");
+            writer.String(my_peptide_lists.prot_f[i].prot_seq.c_str());
+            writer.Key("Total Intensity");
+            writer.Double(my_peptide_lists.prot_f[i].total);
+            writer.Key("Percent Miss-Cleaved");
+            writer.Double(my_peptide_lists.prot_f[i].percentMiss);
+            writer.Key("Tryptic Peptides");
+            writer.StartArray();
+            for (int j = 0; j < my_peptide_lists.prot_f[i].trypPeptides.size(); j++) {
+                writer.String(my_peptide_lists.prot_f[i].trypPeptides[j].c_str());
+            }
+            writer.EndArray();
+            writer.Key("Miss Cleaved Peptides");
+            writer.StartArray();
+            for (int j = 0; j < my_peptide_lists.prot_f[i].missPeptides.size(); j++) {
+                writer.String(my_peptide_lists.prot_f[i].missPeptides[j].c_str());
+            }
+            writer.EndArray();
+            writer.EndObject();
+        }
+        writer.EndObject();
+        cout << s.GetString() << endl;
+
+        //writer.Key("a");
+        //writer.StartArray();                // Between StartArray()/EndArray(),
+        //for (unsigned i = 0; i < 4; i++)
+        //    writer.Uint(i);                 // all values are elements of the array.
+        //writer.EndArray();
+       
+
+        // {"hello":"world","t":true,"f":false,"n":null,"i":123,"pi":3.1416,"a":[0,1,2,3]}
+      
+
+        //FILE* fin;
+        //FILE* fout;
+        //char str[256];
+
+
+        //double d;
+        //int i;
+        //string s;
+
+
+        //string fname = "C:\\path\\data.txt";  //input file
+        //string fname2 = "result.txt";  //output file
+
+
+        //fin = fopen(fname.c_str(), "rt"); //Try to open input file for (r)eading, and (t)ext
+        //if (fin == NULL) {
+        //    cout << "Cannot find: " << fname << "\nAttempting to open from CWD." << endl;
+        //    string fn = fname.substr(fname.find_last_of('\\') + 1, fname.size()); //if file cannot be opened, try CWD
+        //    fin = fopen(fn.c_str(), "rt");
+        //    if (fin == NULL) {
+        //        cout << "Cannot find: " << fn << "\nYou're SOL. Exiting." << endl;
+        //        return -1;
+        //    }
+        //}
+
+        //int count = 0;
+        //while (!feof(fin)) {  //continue reading our file until we reach the end
+        //    if (fgets(str, 256, fin) == NULL) continue; //grab one line at a time. If a line could not be read, try again.
+        //    if (strlen(str) < 1) continue;
+        //    if (count == 0) d = atof(str);  //convert the first value to double-precision
+        //    else if (count == 1) i = atoi(str); //convert the second value to integer
+        //    else s = str; //last value is a string
+        //    count++;
+        //}
+        //fclose(fin);
+
+        //fout = fopen(fname2.c_str(), "wt"); //open this file for (w)rite, and (t)ext
+        //fprintf(fout, "Double-precision, 2 decimal places: %.2lf\n", d);
+        //fprintf(fout, "Integer: %d\n", i);
+        //fprintf(fout, "String: %s\n", s.c_str());
+        //fclose(fout);
+
+    
+ 
 }

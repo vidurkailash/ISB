@@ -78,7 +78,8 @@ typedef struct parameters {
 	float run_time; 
 	double ppm; 
 	std::string cleave_loc;
-	std::string anti_cleave_loc; 
+	std::string hyphen; 
+	std::string anti_cleave_loc;
 
 } my_parameters;
 
