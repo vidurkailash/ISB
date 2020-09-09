@@ -351,7 +351,12 @@ int main(int argc, char* argv[])
 
 	
 	cout << "computing protein level stats" << endl; 
-	if(pr.prot_stats(my_peptide_lists)){}
+	if(pr.prot_stats(my_peptide_lists)){
+		string of;
+		of=my_params.filename;
+		of+=".json";
+		my_deep_functions.json(my_peptide_lists,of); //MH: I had to move this up here because there are horrid memory leaks that occur otherwise.
+	}
 	else{}
 
 
@@ -361,7 +366,7 @@ int main(int argc, char* argv[])
 	my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
 		
 	my_deep_functions.print(my_peptide_lists, my_metrics); 
-	my_deep_functions.json(my_peptide_lists);
+	//my_deep_functions.json(my_peptide_lists);
 
 	/*for (int i = 0; i < my_peptide_lists.prot_f.size(); i++) {
 		for (int j = 0; j < my_peptide_lists.prot_f[i].trypPeptides.size(); j++) {

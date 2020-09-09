@@ -83,7 +83,7 @@ public:
 	bool cleanNoise(std::vector<dsXIC>& v);
 	float calcPeakArea(std::vector<dsXIC>& v);
 	void print(peptide_lists& my_peptide_lists, metrics& my_metrics);
-	void json(peptide_lists& my_peptide_lists); 
+	void json(peptide_lists& my_peptide_lists, std::string fn); 
 
 private: 
 	static bool compareInten(const dsPair& a, const dsPair& b) { return a.ft_areaXIC > b.ft_areaXIC; };
