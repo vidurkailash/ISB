@@ -1464,90 +1464,101 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
   
 }
 
-void deep_functions::json(peptide_lists& my_peptide_lists) {
+void deep_functions::json(peptide_lists& my_peptide_lists, string fn) {
     
-
-        StringBuffer s;
-        PrettyWriter<StringBuffer> writer(s);
-
+  StringBuffer s;
+  PrettyWriter<StringBuffer> writer(s);
      
-        writer.StartObject();
-        for (int i = 0; i < 20 /*my_peptide_lists.prot_f.size()*/; i++) {
-            writer.StartObject();
-            writer.Key("Protein Name");
-            writer.String(my_peptide_lists.prot_f[i].prot_seq.c_str());
-            writer.Key("Total Intensity");
-            writer.Double(my_peptide_lists.prot_f[i].total);
-            writer.Key("Percent Miss-Cleaved");
-            writer.Double(my_peptide_lists.prot_f[i].percentMiss);
-            writer.Key("Tryptic Peptides");
-            writer.StartArray();
-            for (int j = 0; j < my_peptide_lists.prot_f[i].trypPeptides.size(); j++) {
-                writer.String(my_peptide_lists.prot_f[i].trypPeptides[j].c_str());
-            }
-            writer.EndArray();
-            writer.Key("Miss Cleaved Peptides");
-            writer.StartArray();
-            for (int j = 0; j < my_peptide_lists.prot_f[i].missPeptides.size(); j++) {
-                writer.String(my_peptide_lists.prot_f[i].missPeptides[j].c_str());
-            }
-            writer.EndArray();
-            writer.EndObject();
-        }
-        writer.EndObject();
-        cout << s.GetString() << endl;
+  writer.StartObject();
+  writer.Key("Proteins");
+  writer.StartArray();
+  for (int i = 0; i <my_peptide_lists.prot_f.size(); i++) {
+    writer.StartObject();
+    writer.Key("Protein Name");
+            
+    writer.String(my_peptide_lists.prot_f[i].prot_seq.c_str());
+    writer.Key("Total Intensity");
+    writer.Double(my_peptide_lists.prot_f[i].total);
+    writer.Key("Percent Miss-Cleaved");
+    writer.Double(my_peptide_lists.prot_f[i].percentMiss);
+    writer.Key("Tryptic Peptides");
+    writer.StartArray();
+    for (int j = 0; j < my_peptide_lists.prot_f[i].trypPeptides.size(); j++) {
+      writer.StartObject();
+      writer.Key(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].pep_seq.c_str());
+      writer.Double(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].areaXIC);
+      writer.EndObject();
+    }
+    writer.EndArray();
+    writer.Key("Miss Cleaved Peptides");
+    writer.StartArray();
+    for (int j = 0; j < my_peptide_lists.prot_f[i].missPeptides.size(); j++) {
+      writer.StartObject();
+      writer.Key(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].pep_seq.c_str());
+      writer.Double(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].areaXIC);
+      writer.EndObject();
+    }
+    writer.EndArray();
+    writer.EndObject();
+  }
+  writer.EndArray();
+  writer.EndObject();
 
-        //writer.Key("a");
-        //writer.StartArray();                // Between StartArray()/EndArray(),
-        //for (unsigned i = 0; i < 4; i++)
-        //    writer.Uint(i);                 // all values are elements of the array.
-        //writer.EndArray();
+  FILE* f=fopen(fn.c_str(),"wt");
+  fprintf(f,"%s",s.GetString());
+  fclose(f);
+
+  //writer.Key("a");
+  //writer.StartArray();                // Between StartArray()/EndArray(),
+  //for (unsigned i = 0; i < 4; i++)
+  //    writer.Uint(i);                 // all values are elements of the array.
+  //writer.EndArray();
        
 
-        // {"hello":"world","t":true,"f":false,"n":null,"i":123,"pi":3.1416,"a":[0,1,2,3]}
+  // {"hello":"world","t":true,"f":false,"n":null,"i":123,"pi":3.1416,"a":[0,1,2,3]}
       
 
-        //FILE* fin;
-        //FILE* fout;
-        //char str[256];
+  //FILE* fin;
+  //FILE* fout;
+  //char str[256];
 
 
-        //double d;
-        //int i;
-        //string s;
+  //double d;
+  //int i;
+  //string s;
 
 
-        //string fname = "C:\\path\\data.txt";  //input file
-        //string fname2 = "result.txt";  //output file
+  //string fname = "C:\\path\\data.txt";  //input file
+  //string fname2 = "result.txt";  //output file
 
 
-        //fin = fopen(fname.c_str(), "rt"); //Try to open input file for (r)eading, and (t)ext
-        //if (fin == NULL) {
-        //    cout << "Cannot find: " << fname << "\nAttempting to open from CWD." << endl;
-        //    string fn = fname.substr(fname.find_last_of('\\') + 1, fname.size()); //if file cannot be opened, try CWD
-        //    fin = fopen(fn.c_str(), "rt");
-        //    if (fin == NULL) {
-        //        cout << "Cannot find: " << fn << "\nYou're SOL. Exiting." << endl;
-        //        return -1;
-        //    }
-        //}
+  //fin = fopen(fname.c_str(), "rt"); //Try to open input file for (r)eading, and (t)ext
+  //if (fin == NULL) {
+  //    cout << "Cannot find: " << fname << "\nAttempting to open from CWD." << endl;
+  //    string fn = fname.substr(fname.find_last_of('\\') + 1, fname.size()); //if file cannot be opened, try CWD
+  //    fin = fopen(fn.c_str(), "rt");
+  //    if (fin == NULL) {
+  //        cout << "Cannot find: " << fn << "\nYou're SOL. Exiting." << endl;
+  //        return -1;
+  //    }
+  //}
 
-        //int count = 0;
-        //while (!feof(fin)) {  //continue reading our file until we reach the end
-        //    if (fgets(str, 256, fin) == NULL) continue; //grab one line at a time. If a line could not be read, try again.
-        //    if (strlen(str) < 1) continue;
-        //    if (count == 0) d = atof(str);  //convert the first value to double-precision
-        //    else if (count == 1) i = atoi(str); //convert the second value to integer
-        //    else s = str; //last value is a string
-        //    count++;
-        //}
-        //fclose(fin);
+  //int count = 0;
+  //while (!feof(fin)) {  //continue reading our file until we reach the end
+  //    if (fgets(str, 256, fin) == NULL) continue; //grab one line at a time. If a line could not be read, try again.
+  //    if (strlen(str) < 1) continue;
+  //    if (count == 0) d = atof(str);  //convert the first value to double-precision
+  //    else if (count == 1) i = atoi(str); //convert the second value to integer
+  //    else s = str; //last value is a string
+  //    count++;
+  //}
+  //fclose(fin);
 
-        //fout = fopen(fname2.c_str(), "wt"); //open this file for (w)rite, and (t)ext
-        //fprintf(fout, "Double-precision, 2 decimal places: %.2lf\n", d);
-        //fprintf(fout, "Integer: %d\n", i);
-        //fprintf(fout, "String: %s\n", s.c_str());
-        //fclose(fout);
+  //fout = fopen(fname2.c_str(), "wt"); //open this file for (w)rite, and (t)ext
+  //fprintf(fout, "Double-precision, 2 decimal places: %.2lf\n", d);
+  //fprintf(fout, "Integer: %d\n", i);
+  //fprintf(fout, "String: %s\n", s.c_str());
+  //fclose(fout);
 
     
  

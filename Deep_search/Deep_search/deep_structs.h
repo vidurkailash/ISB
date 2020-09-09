@@ -54,8 +54,11 @@ typedef struct dsPair {
 
 typedef struct dsProtein {
 	std::string prot_seq;
-	std::vector<std::string> trypPeptides; //references to peptides counted as tryptic
-	std::vector<std::string> missPeptides; //references to peptides counted as missed cleaved
+
+	//MH: These two vectors have been changed to index references to access ALL peptide data.
+	std::vector<size_t> trypPeptides; //references to peptides counted as tryptic
+	std::vector<size_t> missPeptides; //references to peptides counted as missed cleaved
+
 	float sumTryp;
 	float sumMiss;
 	float percentMiss;

@@ -87,23 +87,23 @@ float protein_reader::prot_calc(std::vector<dsPeptide>& v, char cleave) {
 }
 
 
-vector<string> protein_reader::index_counter(std::vector<dsPeptide>& v, char cleave) {
+vector<size_t> protein_reader::index_counter(std::vector<dsPeptide>& v, char cleave) {
 
-	vector<string> tmp; 
+	vector<size_t> tmp; 
 	tmp.clear(); 
 
 	switch (cleave) {
 	case 'f':
 		for (size_t i = 0; i < v.size(); i++) {
 			if (v[i].miss_cleaves == 0) {
-				tmp.push_back(v[i].pep_seq);
+				tmp.push_back(i);
 			}
 		}
 		break;
 	case 'm':
 		for (size_t i = 0; i < v.size(); i++) {
 			if (v[i].miss_cleaves != 0) {
-				tmp.push_back(v[i].pep_seq);
+				tmp.push_back(i);
 			}
 		}
 		break;
