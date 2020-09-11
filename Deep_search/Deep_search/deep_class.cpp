@@ -1485,7 +1485,9 @@ void deep_functions::json(peptide_lists& my_peptide_lists, string fn) {
     writer.StartArray();
     for (int j = 0; j < my_peptide_lists.prot_f[i].trypPeptides.size(); j++) {
       writer.StartObject();
-      writer.Key(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].pep_seq.c_str());
+      writer.Key("Sequence");
+      writer.String(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].pep_seq.c_str());
+      writer.Key("Abundance");
       writer.Double(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].areaXIC);
       writer.EndObject();
     }
@@ -1494,7 +1496,9 @@ void deep_functions::json(peptide_lists& my_peptide_lists, string fn) {
     writer.StartArray();
     for (int j = 0; j < my_peptide_lists.prot_f[i].missPeptides.size(); j++) {
       writer.StartObject();
-      writer.Key(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].pep_seq.c_str());
+      writer.Key("Sequence");
+      writer.String(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].pep_seq.c_str());
+      writer.Key("Abundance");
       writer.Double(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].areaXIC);
       writer.EndObject();
     }
