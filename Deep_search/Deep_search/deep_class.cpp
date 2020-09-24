@@ -28,7 +28,6 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
 
     int c = 0;
     int d = 0;
-    int e = 0;
 
     for (spectrum_node; spectrum_node; spectrum_node = spectrum_node->next_sibling())
     {
@@ -48,17 +47,17 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
                             d++;
                         }
                         if (atof(secondary_node->first_node("interprophet_result")->first_attribute("probability")->value()) >= my_params.ipro_prob) {
-                            my_peptide_lists.all_real.push_back(dsPeptide());
-                            my_peptide_lists.all_real[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
-                            my_peptide_lists.all_real[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
-                            my_peptide_lists.all_real[c].pre_neutral_mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
-                            my_peptide_lists.all_real[c].xml_rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
-                            my_peptide_lists.all_real[c].prev_aa = (string)sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value();
-                            my_peptide_lists.all_real[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
-                            my_peptide_lists.all_real[c].prot_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("protein")->value());
-                            my_peptide_lists.all_real[c].calc_neutral_mass = atof(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("calc_neutral_pep_mass")->value());
+                            my_peptide_lists.all_psm.push_back(dsPSM());
+                            my_peptide_lists.all_psm[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
+                            my_peptide_lists.all_psm[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
+                            my_peptide_lists.all_psm[c].pre_neutral_mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
+                            my_peptide_lists.all_psm[c].xml_rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
+                            my_peptide_lists.all_psm[c].prev_aa = (string)sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value();
+                            my_peptide_lists.all_psm[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
+                            my_peptide_lists.all_psm[c].prot_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("protein")->value());
+                            my_peptide_lists.all_psm[c].calc_neutral_mass = atof(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("calc_neutral_pep_mass")->value());
                             if (atoi(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("num_tot_proteins")->value()) == 1) {
-                                my_peptide_lists.all_real[c].proteotypic = 1;
+                                my_peptide_lists.all_psm[c].proteotypic = 1;
                             }
                             c++;
                         }
@@ -74,17 +73,17 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
                     d++;
                 }
                 if (atof(sample_node->first_node("search_result")->first_node("search_hit")->first_node("analysis_result")->first_node("peptideprophet_result")->first_attribute("probability")->value()) >= my_params.pep_prob) {
-                    my_peptide_lists.all_real.push_back(dsPeptide());
-                    my_peptide_lists.all_real[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
-                    my_peptide_lists.all_real[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
-                    my_peptide_lists.all_real[c].pre_neutral_mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
-                    my_peptide_lists.all_real[c].xml_rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
-                    my_peptide_lists.all_real[c].prev_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value());
-                    my_peptide_lists.all_real[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
-                    my_peptide_lists.all_real[c].prot_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("protein")->value());
-                    my_peptide_lists.all_real[c].calc_neutral_mass = atof(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("calc_neutral_pep_mass")->value());
+                    my_peptide_lists.all_psm.push_back(dsPSM());
+                    my_peptide_lists.all_psm[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
+                    my_peptide_lists.all_psm[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
+                    my_peptide_lists.all_psm[c].pre_neutral_mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
+                    my_peptide_lists.all_psm[c].xml_rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
+                    my_peptide_lists.all_psm[c].prev_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value());
+                    my_peptide_lists.all_psm[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
+                    my_peptide_lists.all_psm[c].prot_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("protein")->value());
+                    my_peptide_lists.all_psm[c].calc_neutral_mass = atof(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("calc_neutral_pep_mass")->value());
                     if (atoi(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("num_tot_proteins")->value()) == 1) {
-                        my_peptide_lists.all_real[c].proteotypic = 1;
+                        my_peptide_lists.all_psm[c].proteotypic = 1;
                     }
                     c++;
                 }
@@ -99,123 +98,50 @@ peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
     }
     my_peptide_lists.total = d;
 
+
+    /*for (int i = 0; i < my_peptide_lists.all_real.size(); i++) {
+        cout << my_peptide_lists.all_real[i].pep_seq << "  " << my_peptide_lists.all_real[i].xml_rtime << endl; 
+    }*/
+
+
+
     return my_peptide_lists;
 
 }
 
-bool deep_functions::tryptic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params) {
+bool deep_functions::enzymatic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params) {
 
-   
-    //NEW METHOD
-    int c = 0;
-    int d = 0;
-    int e = 0; 
 
-    for (size_t i = 0; i < my_peptide_lists.all_real.size(); i++) {
-        size_t found = my_params.cleave_loc.find(my_peptide_lists.all_real[i].prev_aa);
-        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.all_real[i].pep_seq.back());
-        size_t found2 = my_params.hyphen.find(my_peptide_lists.all_real[i].next_aa);
+    for (size_t i = 0; i < my_peptide_lists.all_psm.size(); i++) {
+        size_t found = my_params.cleave_loc.find(my_peptide_lists.all_psm[i].prev_aa);
+        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.all_psm[i].pep_seq.back());
+        size_t found2 = my_params.hyphen.find(my_peptide_lists.all_psm[i].next_aa);
         if (found!= string::npos && (found1!=string::npos || found2!=string::npos)) {
-
-            my_peptide_lists.tryptic_real.push_back(dsPeptide());
-            my_peptide_lists.tryptic_real[c].pep_seq = my_peptide_lists.all_real[i].pep_seq;
-            my_peptide_lists.tryptic_real[c].charge = my_peptide_lists.all_real[i].charge;
-            my_peptide_lists.tryptic_real[c].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
-            my_peptide_lists.tryptic_real[c].prev_aa = my_peptide_lists.all_real[i].prev_aa;
-            my_peptide_lists.tryptic_real[c].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
-            my_peptide_lists.tryptic_real[c].next_aa = my_peptide_lists.all_real[i].next_aa;
-            my_peptide_lists.tryptic_real[c].prot_seq = my_peptide_lists.all_real[i].prot_seq;
-            my_peptide_lists.tryptic_real[c].proteotypic = my_peptide_lists.all_real[i].proteotypic;
-            my_peptide_lists.tryptic_real[c].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
-
-            c++;
+            my_peptide_lists.all_psm[i].enzymatic = 1; 
+        }
+        if (found == string::npos && found1 == string::npos) {
+            my_peptide_lists.all_psm[i].non_enzymatic = 1;
         }
         
-        else {
-
-            my_peptide_lists.non_tryptic_real.push_back(dsPeptide());
-            my_peptide_lists.non_tryptic_real[d].pep_seq = my_peptide_lists.all_real[i].pep_seq;
-            my_peptide_lists.non_tryptic_real[d].charge = my_peptide_lists.all_real[i].charge;
-            my_peptide_lists.non_tryptic_real[d].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
-            my_peptide_lists.non_tryptic_real[d].prev_aa = my_peptide_lists.all_real[i].prev_aa;
-            my_peptide_lists.non_tryptic_real[d].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
-            my_peptide_lists.non_tryptic_real[d].next_aa = my_peptide_lists.all_real[i].next_aa;
-            my_peptide_lists.non_tryptic_real[d].prot_seq = my_peptide_lists.all_real[i].prot_seq;
-            my_peptide_lists.non_tryptic_real[d].proteotypic = my_peptide_lists.all_real[i].proteotypic;
-            my_peptide_lists.non_tryptic_real[d].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
-
-            d++;
-        }
     }
-
-
-
     return true;
 
 }
 
-bool deep_functions::semi_tryptic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params) {
+bool deep_functions::semi_enzymatic_calc(peptide_lists& my_peptide_lists, my_parameters& my_params) {
 
-    int c = 0;
-    for (size_t i = 0; i < my_peptide_lists.all_real.size(); i++) {
-        size_t found = my_params.cleave_loc.find(my_peptide_lists.all_real[i].prev_aa);
-        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.all_real[i].pep_seq.back());
-        size_t found2 = my_params.hyphen.find(my_peptide_lists.all_real[i].next_aa);
+    for (size_t i = 0; i < my_peptide_lists.all_psm.size(); i++) {
+        size_t found = my_params.cleave_loc.find(my_peptide_lists.all_psm[i].prev_aa);
+        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.all_psm[i].pep_seq.back());
+        size_t found2 = my_params.hyphen.find(my_peptide_lists.all_psm[i].next_aa);
         if (found != string::npos || (found1 != string::npos || found2 != string::npos)) {
-
-            my_peptide_lists.semi_tryptic_real.push_back(dsPeptide());
-            my_peptide_lists.semi_tryptic_real[c].pep_seq = my_peptide_lists.all_real[i].pep_seq;
-            my_peptide_lists.semi_tryptic_real[c].charge = my_peptide_lists.all_real[i].charge;
-            my_peptide_lists.semi_tryptic_real[c].pre_neutral_mass = my_peptide_lists.all_real[i].pre_neutral_mass;
-            my_peptide_lists.semi_tryptic_real[c].prev_aa = my_peptide_lists.all_real[i].prev_aa;
-            my_peptide_lists.semi_tryptic_real[c].xml_rtime = my_peptide_lists.all_real[i].xml_rtime;
-            my_peptide_lists.semi_tryptic_real[c].next_aa = my_peptide_lists.all_real[i].next_aa;
-            my_peptide_lists.semi_tryptic_real[c].prot_seq = my_peptide_lists.all_real[i].prot_seq;
-            my_peptide_lists.semi_tryptic_real[c].proteotypic = my_peptide_lists.all_real[i].proteotypic;
-            my_peptide_lists.semi_tryptic_real[c].calc_neutral_mass = my_peptide_lists.all_real[i].calc_neutral_mass;
-
-            c++;
+            my_peptide_lists.all_psm[i].semi_enzymatic = 1;  
+        }
+        if (found != string::npos && (found1 != string::npos || found2 != string::npos) && my_peptide_lists.all_psm[i].semi_enzymatic == 1) {
+            my_peptide_lists.all_psm[i].semi_enzymatic = 0;
         }
     }
-
   
-    for (int i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
-        size_t found = my_params.cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].prev_aa);
-        size_t found1 = my_params.cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].pep_seq.back());
-        size_t found2 = my_params.hyphen.find(my_peptide_lists.semi_tryptic_real[i].next_aa);
-        if (found != string::npos && (found1 != string::npos || found2 != string::npos)) {
-            if (i == 0) {
-                my_peptide_lists.semi_tryptic_real.erase(my_peptide_lists.semi_tryptic_real.begin() + i);
-                i = 0;
-            }
-            if (i != 0) {
-                my_peptide_lists.semi_tryptic_real.erase(my_peptide_lists.semi_tryptic_real.begin() + i);
-                i = i - 1; 
-            }
-        }
-
-    }
-
-    my_peptide_lists.semi_tryptic_real.erase(my_peptide_lists.semi_tryptic_real.begin());
-
-
-    for (int i = 0; i < my_peptide_lists.non_tryptic_real.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.semi_tryptic_real.size(); j++) {
-            if (my_peptide_lists.non_tryptic_real[i].pep_seq == my_peptide_lists.semi_tryptic_real[j].pep_seq && i == 0) {
-                my_peptide_lists.non_tryptic_real.erase(my_peptide_lists.non_tryptic_real.begin() + i);
-                i = 0;
-            }
-            if (my_peptide_lists.non_tryptic_real[i].pep_seq == my_peptide_lists.semi_tryptic_real[j].pep_seq && i != 0) {
-                my_peptide_lists.non_tryptic_real.erase(my_peptide_lists.non_tryptic_real.begin() + i);
-                i = i - 1; 
-            }
-        }
-    }
-
-    /*for (int i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
-        cout << my_peptide_lists.semi_tryptic_real[i].prev_aa << "  " << my_peptide_lists.semi_tryptic_real[i].pep_seq << "  " << my_peptide_lists.semi_tryptic_real[i].next_aa << endl; 
-    }*/
-
 
     return true; 
 }
@@ -223,232 +149,215 @@ bool deep_functions::semi_tryptic_calc(peptide_lists& my_peptide_lists, my_param
 
 bool deep_functions::miss_cleave(peptide_lists& my_peptide_lists, my_parameters& my_params) {
 
-   //NEW METHOD
+   
     int c = 0;
-    for (int i = 0; i < my_peptide_lists.tryptic_real.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.tryptic_real[i].pep_seq.size() - 1; j++) {
-            size_t found = my_params.cleave_loc.find(my_peptide_lists.tryptic_real[i].pep_seq[j]);
-            size_t found1 = my_params.anti_cleave_loc.find(my_peptide_lists.tryptic_real[i].pep_seq[j + 1]);
+    for (int i = 0; i < my_peptide_lists.all_psm.size(); i++) {
+        for (int j = 0; j < my_peptide_lists.all_psm[i].pep_seq.size() - 1; j++) {
+            size_t found = my_params.cleave_loc.find(my_peptide_lists.all_psm[i].pep_seq[j]);
+            size_t found1 = my_params.anti_cleave_loc.find(my_peptide_lists.all_psm [i].pep_seq[j + 1]);
             if (found!=string::npos && found1==string::npos) {
                 c++;
             }
         }
-        my_peptide_lists.tryptic_real[i].miss_cleaves = c;
+        my_peptide_lists.all_psm[i].miss_cleaves = c;
         c = 0;
     }
-
-    int d = 0;
-    for (int i = 0; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.semi_tryptic_real[i].pep_seq.size() - 1; j++) {
-            size_t found = my_params.cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].pep_seq[j]);
-            size_t found1 = my_params.anti_cleave_loc.find(my_peptide_lists.semi_tryptic_real[i].pep_seq[j + 1]);
-            if (found != string::npos && found1 == string::npos) {
-                d++;
-            }
-        }
-        my_peptide_lists.semi_tryptic_real[i].miss_cleaves = d;
-        d = 0;
-    }
-    
-    //TEST
-   /* c = 0; 
-    for (int i = 0; i < my_peptide_lists.all_real.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.all_real[i].pep_seq.size() - 1; j++) {
-            size_t found5 = my_params.cleave_loc.find(my_peptide_lists.all_real[i].pep_seq[j]);
-            size_t found6 = my_params.anti_cleave_loc.find(my_peptide_lists.all_real[i].pep_seq[j + 1]);
-            if (found5 != string::npos && found6 == string::npos) {
-                c++;
-            }
-        }
-        my_peptide_lists.all_real[i].miss_cleaves = c;
-        c = 0;
-    }
-    int zero = 0; 
-    int one = 0;
-    int two = 0; 
-
-    for (int i = 0; i < my_peptide_lists.all_real.size(); i++) {
-        if (my_peptide_lists.all_real[i].miss_cleaves == 0) {
-            cout << my_peptide_lists.all_real[i].pep_seq << "  " << my_peptide_lists.all_real[i].prev_aa << "  " << my_peptide_lists.all_real[i].next_aa << endl; 
-            zero++; 
-        }
-        if (my_peptide_lists.all_real[i].miss_cleaves == 1) {
-            one++; 
-        }
-        if (my_peptide_lists.all_real[i].miss_cleaves == 2) {
-            two++;
-        }
-    }
-
-    cout << zero << "  " << one << "  " << two << endl; */
 
     return true;
 
 }
-
-
-
-
 
 bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
 
-
     size_t i;
+    vector<dsPSM> tmp;
+    vector<dsPeptide> tmp1;
+    for (i = 0; i < my_peptide_lists.all_psm.size(); i++) {
+        if (my_peptide_lists.all_psm[i].enzymatic == 1) {
+            tmp.push_back(my_peptide_lists.all_psm[i]);
+        }
+    }
 
-    //Sort the tryptic array by sequence and then charge state
-    sort(my_peptide_lists.tryptic_real.begin(), my_peptide_lists.tryptic_real.end(), compareSeqZ);
+    sort(tmp.begin(), tmp.end(), compareSeqZ);
     
-
-    //Iterate over all tryptic PSMs, keeping each unique instance of sequence and charge
-    my_peptide_lists.tryp_unique_z_real.push_back(my_peptide_lists.tryptic_real[0]);
-    for (i = 1; i < my_peptide_lists.tryptic_real.size(); i++) {
-        if (my_peptide_lists.tryp_unique_z_real.back().pep_seq.compare(my_peptide_lists.tryptic_real[i].pep_seq) == 0 &&
-            my_peptide_lists.tryp_unique_z_real.back().charge == my_peptide_lists.tryptic_real[i].charge) continue;
-        my_peptide_lists.tryp_unique_z_real.push_back(my_peptide_lists.tryptic_real[i]);
+    for (i = 0; i < tmp.size(); i++) {
+        tmp1.push_back(dsPeptide()); 
+        tmp1[i].pep_seq = tmp[i].pep_seq;
+        tmp1[i].prot_seq = tmp[i].prot_seq;
+        tmp1[i].proteotypic = tmp[i].proteotypic;
+        tmp1[i].enzymatic = tmp[i].enzymatic;
+        tmp1[i].non_enzymatic = tmp[i].non_enzymatic;
+        tmp1[i].semi_enzymatic = tmp[i].semi_enzymatic;
+        tmp1[i].charge = tmp[i].charge;
+        tmp1[i].xml_rtime = tmp[i].xml_rtime;
+        tmp1[i].pre_neutral_mass = tmp[i].pre_neutral_mass;
+        tmp1[i].calc_neutral_mass = tmp[i].calc_neutral_mass;
+        tmp1[i].xml_mz = tmp[i].xml_mz;
+        tmp1[i].miss_cleaves = tmp[i].miss_cleaves;
+        tmp1[i].prev_aa = tmp[i].prev_aa;
+        tmp1[i].next_aa = tmp[i].next_aa;
+        
+    }
+   
+    my_peptide_lists.enzymatic_unique.push_back(tmp1[0]);
+    for (i = 1; i < tmp1.size(); i++) {
+        if (my_peptide_lists.enzymatic_unique.back().pep_seq.compare(tmp1[i].pep_seq) == 0) continue;
+        my_peptide_lists.enzymatic_unique.push_back(tmp1[i]);
+    }
+    
+    vector<string> temp; 
+    for (int i = 0; i < tmp1.size(); i++) {
+        temp.push_back(tmp1[i].pep_seq); 
+    }
+    
+    for (int i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        int c = count(temp.begin(), temp.end(), my_peptide_lists.enzymatic_unique[i].pep_seq);
+        my_peptide_lists.enzymatic_unique[i].psm_count = c; 
+        c = 0; 
     }
 
-
-    //Repeat the process, keeping each unique instance of sequence;
-    my_peptide_lists.tryp_unique_real.push_back(my_peptide_lists.tryptic_real[0]);
-    for (i = 1; i < my_peptide_lists.tryptic_real.size(); i++) {
-        if (my_peptide_lists.tryp_unique_real.back().pep_seq.compare(my_peptide_lists.tryptic_real[i].pep_seq) == 0) continue;
-        my_peptide_lists.tryp_unique_real.push_back(my_peptide_lists.tryptic_real[i]);
-    }
-
-  
-
-    //Now of the unique peptide sequences, make a subset of miscleaved peptides
-    i = 0;
-    while (my_peptide_lists.tryp_unique_real[i].miss_cleaves == 0) i++; //no boundary checks here
-    my_peptide_lists.miss_unique_real.push_back(my_peptide_lists.tryp_unique_real[i]);
-    for (i = i + 1; i < my_peptide_lists.tryp_unique_real.size(); i++) {
-        if (my_peptide_lists.tryp_unique_real[i].miss_cleaves == 0) continue;
-        my_peptide_lists.miss_unique_real.push_back(my_peptide_lists.tryp_unique_real[i]);
-    }
-
-    for (i = 0; i < my_peptide_lists.tryp_unique_real.size(); i++) {
-        if (my_peptide_lists.tryp_unique_real[i].miss_cleaves != 0) continue;
-        my_peptide_lists.fully_tryp_unique_real.push_back(my_peptide_lists.tryp_unique_real[i]);
-    }
-
-
-    if (my_peptide_lists.semi_tryptic_real.size() > 0) {
-        sort(my_peptide_lists.semi_tryptic_real.begin(), my_peptide_lists.semi_tryptic_real.end(), compareSeqZ);
-
-        //semi tryptic 
-        my_peptide_lists.semi_tryptic_unique_z_real.push_back(my_peptide_lists.semi_tryptic_real[0]);
-        for (i = 1; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
-            if (my_peptide_lists.semi_tryptic_unique_z_real.back().pep_seq.compare(my_peptide_lists.semi_tryptic_real[i].pep_seq) == 0 &&
-                my_peptide_lists.semi_tryptic_unique_z_real.back().charge == my_peptide_lists.semi_tryptic_real[i].charge) continue;
-            my_peptide_lists.semi_tryptic_unique_z_real.push_back(my_peptide_lists.semi_tryptic_real[i]);
-        }
-
-        // semi tryptic 
-        my_peptide_lists.semi_tryptic_unique_real.push_back(my_peptide_lists.semi_tryptic_real[0]);
-        for (i = 1; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
-            if (my_peptide_lists.semi_tryptic_unique_real.back().pep_seq.compare(my_peptide_lists.semi_tryptic_real[i].pep_seq) == 0) continue;
-            my_peptide_lists.semi_tryptic_unique_real.push_back(my_peptide_lists.semi_tryptic_real[i]);
-        }
-
-    }
+   
     return true;
 
 }
+
+
+//bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
+//
+//    size_t i;
+//    vector<dsPSM> tmp, tmp1;
+//    for (i = 0; i < my_peptide_lists.all_psm.size(); i++) {
+//        if (my_peptide_lists.all_psm[i].enzymatic == 1) {
+//            tmp.push_back(my_peptide_lists.all_psm[i]);
+//        }
+//    }
+//
+//    //Sort the tryptic array by sequence and then charge state
+//    sort(tmp.begin(), tmp.end(), compareSeqZ);
+//
+//
+//    //Iterate over all tryptic PSMs, keeping each unique instance of sequence and charge
+//    my_peptide_lists.tryp_unique_z_real.push_back(tmp[0]);
+//    for (i = 1; i < my_peptide_lists.tryptic_real.size(); i++) {
+//        if (my_peptide_lists.tryp_unique_z_real.back().pep_seq.compare(my_peptide_lists.tryptic_real[i].pep_seq) == 0 &&
+//            my_peptide_lists.tryp_unique_z_real.back().charge == my_peptide_lists.tryptic_real[i].charge) continue;
+//        my_peptide_lists.tryp_unique_z_real.push_back(my_peptide_lists.tryptic_real[i]);
+//    }
+//
+//
+//    //Repeat the process, keeping each unique instance of sequence;
+//    my_peptide_lists.tryp_unique_real.push_back(my_peptide_lists.tryptic_real[0]);
+//    for (i = 1; i < my_peptide_lists.tryptic_real.size(); i++) {
+//        if (my_peptide_lists.tryp_unique_real.back().pep_seq.compare(my_peptide_lists.tryptic_real[i].pep_seq) == 0) continue;
+//        my_peptide_lists.tryp_unique_real.push_back(my_peptide_lists.tryptic_real[i]);
+//    }
+//
+//
+//
+//    //Now of the unique peptide sequences, make a subset of miscleaved peptides
+//    i = 0;
+//    while (my_peptide_lists.tryp_unique_real[i].miss_cleaves == 0) i++; //no boundary checks here
+//    my_peptide_lists.miss_unique_real.push_back(my_peptide_lists.tryp_unique_real[i]);
+//    for (i = i + 1; i < my_peptide_lists.tryp_unique_real.size(); i++) {
+//        if (my_peptide_lists.tryp_unique_real[i].miss_cleaves == 0) continue;
+//        my_peptide_lists.miss_unique_real.push_back(my_peptide_lists.tryp_unique_real[i]);
+//    }
+//
+//    for (i = 0; i < my_peptide_lists.tryp_unique_real.size(); i++) {
+//        if (my_peptide_lists.tryp_unique_real[i].miss_cleaves != 0) continue;
+//        my_peptide_lists.fully_tryp_unique_real.push_back(my_peptide_lists.tryp_unique_real[i]);
+//    }
+//
+//
+//    if (my_peptide_lists.semi_tryptic_real.size() > 0) {
+//        sort(my_peptide_lists.semi_tryptic_real.begin(), my_peptide_lists.semi_tryptic_real.end(), compareSeqZ);
+//
+//        //semi tryptic 
+//        my_peptide_lists.semi_tryptic_unique_z_real.push_back(my_peptide_lists.semi_tryptic_real[0]);
+//        for (i = 1; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+//            if (my_peptide_lists.semi_tryptic_unique_z_real.back().pep_seq.compare(my_peptide_lists.semi_tryptic_real[i].pep_seq) == 0 &&
+//                my_peptide_lists.semi_tryptic_unique_z_real.back().charge == my_peptide_lists.semi_tryptic_real[i].charge) continue;
+//            my_peptide_lists.semi_tryptic_unique_z_real.push_back(my_peptide_lists.semi_tryptic_real[i]);
+//        }
+//
+//        // semi tryptic 
+//        my_peptide_lists.semi_tryptic_unique_real.push_back(my_peptide_lists.semi_tryptic_real[0]);
+//        for (i = 1; i < my_peptide_lists.semi_tryptic_real.size(); i++) {
+//            if (my_peptide_lists.semi_tryptic_unique_real.back().pep_seq.compare(my_peptide_lists.semi_tryptic_real[i].pep_seq) == 0) continue;
+//            my_peptide_lists.semi_tryptic_unique_real.push_back(my_peptide_lists.semi_tryptic_real[i]);
+//        }
+//
+//    }
+//    return true;
+//
+//}
 
 bool deep_functions::lcd(peptide_lists& my_peptide_lists, my_parameters& my_params) {
 
 
-    //MH: This new method finds all miscleavages for each fully cleaved peptide, and stores them in a
-    //new array.
-
-
-    for (size_t i = 0; i < my_peptide_lists.fully_tryp_unique_real.size(); i++) {
-        my_peptide_lists.fully_tryp_unique_real[i].xml_mz = (my_peptide_lists.fully_tryp_unique_real[i].pre_neutral_mass + (my_peptide_lists.fully_tryp_unique_real[i].charge * 1.00727)) / my_peptide_lists.fully_tryp_unique_real[i].charge;
-        my_peptide_lists.fully_tryp_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.fully_tryp_unique_real[i].calc_neutral_mass;
+    for (size_t i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        my_peptide_lists.enzymatic_unique[i].xml_mz = (my_peptide_lists.enzymatic_unique[i].pre_neutral_mass + (my_peptide_lists.enzymatic_unique[i].charge * 1.00727)) / my_peptide_lists.enzymatic_unique[i].charge;
+        my_peptide_lists.enzymatic_unique[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.enzymatic_unique[i].calc_neutral_mass;
     }
-
-    for (size_t i = 0; i < my_peptide_lists.miss_unique_real.size(); i++) {
-        my_peptide_lists.miss_unique_real[i].xml_mz = (my_peptide_lists.miss_unique_real[i].pre_neutral_mass + (my_peptide_lists.miss_unique_real[i].charge * 1.00727)) / my_peptide_lists.miss_unique_real[i].charge;
-        my_peptide_lists.miss_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.miss_unique_real[i].calc_neutral_mass;
-    }
-
-    for (size_t i = 0; i < my_peptide_lists.semi_tryptic_unique_real.size(); i++) {
-        my_peptide_lists.semi_tryptic_unique_real[i].xml_mz = (my_peptide_lists.semi_tryptic_unique_real[i].pre_neutral_mass + (my_peptide_lists.semi_tryptic_unique_real[i].charge * 1.00727)) / my_peptide_lists.semi_tryptic_unique_real[i].charge;
-        my_peptide_lists.semi_tryptic_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.semi_tryptic_unique_real[i].calc_neutral_mass;
-    }
-
-
-
-
-    //size_t i,j;
-    //for(i=0;i<my_peptide_lists.tryp_unique.size();i++){
-
-    //  //MH: skip any peptides that have miscleavages
-    //  if(my_peptide_lists.tryp_unique[i].miss_cleaves>0) continue;
-
-    //  for(j=0;j<my_peptide_lists.miss_unique.size();j++){
-
-    //    //MH: we have a match, make a new entry
-    //    size_t found = my_peptide_lists.miss_unique[j].pep_seq.find(my_peptide_lists.tryp_unique[i].pep_seq);
-    //    if(found != string::npos && my_peptide_lists.miss_unique[j].pep_seq.compare(my_peptide_lists.tryp_unique[i].pep_seq)!=0) {
-    //      my_features f= my_peptide_lists.miss_unique[j];
-    //      f.d_pep_seq = my_peptide_lists.tryp_unique[i].pep_seq;
-    //      f.d_pep_seq_rt = my_peptide_lists.tryp_unique[i].rtime;
-    //      f.d_miss_cleaves = my_peptide_lists.tryp_unique[i].miss_cleaves;
-    //      f.d_pep_seq_mass = my_peptide_lists.tryp_unique[i].mass;
-    //      f.d_pep_seq_charge = my_peptide_lists.tryp_unique[i].charge;
-    //      if (found == 0) {
-    //        f.cleave_loc = 'R';
-    //        f.cleave_pos = 0;
-    //      } else {
-    //        f.cleave_loc = 'L';
-    //        f.cleave_pos = (int)found;
-    //      }
-    //      f.mz = (f.mass + (f.charge * 1.00727)) / f.charge;
-    //      f.d_pep_seq_mz = (f.d_pep_seq_mass + (f.d_pep_seq_charge * 1.00727)) / f.d_pep_seq_charge;
-    //      my_peptide_lists.d_list.push_back(f);
-    //    }
-
-    //  }
-
-    //}
-
 
     return true; 
 
 }
 
+//bool deep_functions::lcd(peptide_lists& my_peptide_lists, my_parameters& my_params) {
+//
+//
+//    for (size_t i = 0; i < my_peptide_lists.fully_tryp_unique_real.size(); i++) {
+//        my_peptide_lists.fully_tryp_unique_real[i].xml_mz = (my_peptide_lists.fully_tryp_unique_real[i].pre_neutral_mass + (my_peptide_lists.fully_tryp_unique_real[i].charge * 1.00727)) / my_peptide_lists.fully_tryp_unique_real[i].charge;
+//        my_peptide_lists.fully_tryp_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.fully_tryp_unique_real[i].calc_neutral_mass;
+//    }
+//
+//    for (size_t i = 0; i < my_peptide_lists.miss_unique_real.size(); i++) {
+//        my_peptide_lists.miss_unique_real[i].xml_mz = (my_peptide_lists.miss_unique_real[i].pre_neutral_mass + (my_peptide_lists.miss_unique_real[i].charge * 1.00727)) / my_peptide_lists.miss_unique_real[i].charge;
+//        my_peptide_lists.miss_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.miss_unique_real[i].calc_neutral_mass;
+//    }
+//
+//    for (size_t i = 0; i < my_peptide_lists.semi_tryptic_unique_real.size(); i++) {
+//        my_peptide_lists.semi_tryptic_unique_real[i].xml_mz = (my_peptide_lists.semi_tryptic_unique_real[i].pre_neutral_mass + (my_peptide_lists.semi_tryptic_unique_real[i].charge * 1.00727)) / my_peptide_lists.semi_tryptic_unique_real[i].charge;
+//        my_peptide_lists.semi_tryptic_unique_real[i].tolerance = (my_params.ppm / (1000000)) * my_peptide_lists.semi_tryptic_unique_real[i].calc_neutral_mass;
+//    }
+//
+//
+//    return true;
+//
+//}
+
 bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics) {
 
     dsXIC x;
     int a = 0; 
-    int b = 0; 
-    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
-        if (my_peptide_lists.xic_ft_results[i].pep_seq == my_peptide_lists.xic_ft_results[i+1].pep_seq) {
-            x.rTime = my_peptide_lists.xic_ft_results[i].spec_rt;
-            x.intensity = my_peptide_lists.xic_ft_results[i].spec_intensity;
-            my_peptide_lists.xic_ft_results[a].XIC.push_back(x);
+    /*int b = 0; */
+    for (size_t i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        if (my_peptide_lists.enzymatic_unique[i].pep_seq == my_peptide_lists.enzymatic_unique[i+1].pep_seq) {
+            x.rTime = my_peptide_lists.enzymatic_unique[i].spec_rt;
+            x.intensity = my_peptide_lists.enzymatic_unique[i].spec_intensity;
+            my_peptide_lists.enzymatic_unique[a].XIC.push_back(x);
         }
-        else if (my_peptide_lists.xic_ft_results[i].pep_seq != my_peptide_lists.xic_ft_results[i + 1].pep_seq) {
-            x.rTime = my_peptide_lists.xic_ft_results[i].spec_rt;
-            x.intensity = my_peptide_lists.xic_ft_results[i].spec_intensity;
-            my_peptide_lists.xic_ft_results[a].XIC.push_back(x);
+        else if (my_peptide_lists.enzymatic_unique[i].pep_seq != my_peptide_lists.enzymatic_unique[i + 1].pep_seq) {
+            x.rTime = my_peptide_lists.enzymatic_unique[i].spec_rt;
+            x.intensity = my_peptide_lists.enzymatic_unique[i].spec_intensity;
+            my_peptide_lists.enzymatic_unique[a].XIC.push_back(x);
             a = i + 1; 
         }
       
     }
     vector<dsPeptide> tmp;
-    tmp.push_back(my_peptide_lists.xic_ft_results[0]);
-    for (size_t i = 1; i < my_peptide_lists.xic_ft_results.size(); i++) {
-        if (my_peptide_lists.xic_ft_results[i].pep_seq == my_peptide_lists.xic_ft_results[i - 1].pep_seq) continue;
-        tmp.push_back(my_peptide_lists.xic_ft_results[i]);
+    tmp.push_back(my_peptide_lists.enzymatic_unique[0]);
+    for (size_t i = 1; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        if (my_peptide_lists.enzymatic_unique[i].pep_seq == my_peptide_lists.enzymatic_unique[i - 1].pep_seq) continue;
+        tmp.push_back(my_peptide_lists.enzymatic_unique[i]);
     }
-    my_peptide_lists.xic_ft_results = tmp; 
+    my_peptide_lists.enzymatic_unique = tmp; 
     tmp.clear();
 
 
 
-    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+    /*for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
         if (my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i + 1].pep_seq) {
             x.rTime = my_peptide_lists.xic_mc_results[i].spec_rt;
             x.intensity = my_peptide_lists.xic_mc_results[i].spec_intensity;
@@ -467,7 +376,7 @@ bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics
         if (my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i - 1].pep_seq) continue;
         tmp.push_back(my_peptide_lists.xic_mc_results[i]);
     }
-    my_peptide_lists.xic_mc_results = tmp;
+    my_peptide_lists.xic_mc_results = tmp;*/
 
 
 
@@ -475,83 +384,83 @@ bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics
 
     //DELETE NOISE (INTENSITIES LESS THAN 10% OF THE MAX) (NOISE)
 
-    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
-        if (!cleanNoise(my_peptide_lists.xic_ft_results[i].XIC)) {
+    for (size_t i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        if (!cleanNoise(my_peptide_lists.enzymatic_unique[i].XIC)) {
             //handle error
         }
     }
-    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
-        if (!cleanNoise(my_peptide_lists.xic_mc_results[i].XIC)) {
-            //handle error
-        }
-    }
+    //for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+    //    if (!cleanNoise(my_peptide_lists.xic_mc_results[i].XIC)) {
+    //        //handle error
+    //    }
+    //}
 
    
 
 
     //delete peptides with only one data point
     vector<dsPeptide> filter;
-    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
-        if (my_peptide_lists.xic_ft_results[i].XIC.size() > 1) {
-            filter.push_back(my_peptide_lists.xic_ft_results[i]);
+    for (size_t i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        if (my_peptide_lists.enzymatic_unique[i].XIC.size() > 1) {
+            filter.push_back(my_peptide_lists.enzymatic_unique[i]);
         }
     }
-    my_peptide_lists.xic_ft_results = filter;
-    filter.clear();
+    my_peptide_lists.enzymatic_unique = filter;
+    /*filter.clear();
     for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
         if (my_peptide_lists.xic_mc_results[i].XIC.size() > 1) {
             filter.push_back(my_peptide_lists.xic_mc_results[i]);
         }
     }
     my_peptide_lists.xic_mc_results = filter;
-    filter.clear();
+    filter.clear();*/
 
 
 
     cout << "noise deleted" << "\n" << endl;
 
 
-    //metric calculations
-    vector<float> peak;
-    float avg = 0;
-    for (int i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.xic_ft_results[i].XIC.size(); j++) {
-            peak.push_back(my_peptide_lists.xic_ft_results[i].XIC[j].intensity);
-        }
-        avg += *max_element(peak.begin(), peak.end());
-        peak.clear();
-    }
+    ////metric calculations
+    //vector<float> peak;
+    //float avg = 0;
+    //for (int i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
+    //    for (int j = 0; j < my_peptide_lists.xic_ft_results[i].XIC.size(); j++) {
+    //        peak.push_back(my_peptide_lists.xic_ft_results[i].XIC[j].intensity);
+    //    }
+    //    avg += *max_element(peak.begin(), peak.end());
+    //    peak.clear();
+    //}
 
 
-    my_metrics.tryp_avg_high = avg / my_peptide_lists.xic_ft_results.size();
+    //my_metrics.tryp_avg_high = avg / my_peptide_lists.xic_ft_results.size();
 
-    peak.clear();
-    avg = 0;
-    for (int i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
-        for (int j = 0; j < my_peptide_lists.xic_mc_results[i].XIC.size(); j++) {
-            peak.push_back(my_peptide_lists.xic_mc_results[i].XIC[j].intensity);
-        }
-        avg += *max_element(peak.begin(), peak.end());
-        peak.clear();
-    }
+    //peak.clear();
+    //avg = 0;
+    //for (int i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+    //    for (int j = 0; j < my_peptide_lists.xic_mc_results[i].XIC.size(); j++) {
+    //        peak.push_back(my_peptide_lists.xic_mc_results[i].XIC[j].intensity);
+    //    }
+    //    avg += *max_element(peak.begin(), peak.end());
+    //    peak.clear();
+    //}
 
 
-    my_metrics.miss_avg_high = avg / my_peptide_lists.xic_mc_results.size();
+    //my_metrics.miss_avg_high = avg / my_peptide_lists.xic_mc_results.size();
 
    
-    float big = 0; 
-    float big1 = 0; 
+   /* float big = 0; 
+    float big1 = 0; */
     //CALC AREA 
-    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
-        my_peptide_lists.xic_ft_results[i].areaXIC = calcPeakArea(my_peptide_lists.xic_ft_results[i].XIC);
-        big += my_peptide_lists.xic_ft_results[i].areaXIC; 
+    for (size_t i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
+        my_peptide_lists.enzymatic_unique[i].areaXIC = calcPeakArea(my_peptide_lists.enzymatic_unique[i].XIC);
+       /* big += my_peptide_lists.xic_ft_results[i].areaXIC; */
     }
-    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
-        my_peptide_lists.xic_mc_results[i].areaXIC = calcPeakArea(my_peptide_lists.xic_mc_results[i].XIC);
-        big1 += my_peptide_lists.xic_mc_results[i].areaXIC; 
-    }
+    //for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+    //    my_peptide_lists.xic_mc_results[i].areaXIC = calcPeakArea(my_peptide_lists.xic_mc_results[i].XIC);
+    //  /*  big1 += my_peptide_lists.xic_mc_results[i].areaXIC; */
+    //}
 
-    my_metrics.total_intensity = big1 / (big + big1); 
+  /*  my_metrics.total_intensity = big1 / (big + big1); */
    
     // END AREA FUNCTION
 
@@ -564,587 +473,150 @@ bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics
     return true;
 
 }
-
-//XML
-
-//XML
-
-//peptide_lists deep_functions::xml_parse(my_parameters& my_params) {
-//	xml_document<> doc;
+//bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics) {
 //
-//	// Read the xml file into a vector
-//	ifstream theFile(my_params.filename);
-//	vector<char> buffer((istreambuf_iterator<char>(theFile)), istreambuf_iterator<char>());
-//	buffer.push_back('\0');
-//	// Parse the buffer using the xml file parsing library into doc 
-//	doc.parse<0>(&buffer[0]);
-//	// Find root node
-//	xml_node<>* root_node = doc.first_node("msms_pipeline_analysis");
-//	xml_node<>* spectrum_node = root_node->first_node("msms_run_summary");
+//    dsXIC x;
+//    int a = 0;
+//    int b = 0;
+//    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//        if (my_peptide_lists.xic_ft_results[i].pep_seq == my_peptide_lists.xic_ft_results[i + 1].pep_seq) {
+//            x.rTime = my_peptide_lists.xic_ft_results[i].spec_rt;
+//            x.intensity = my_peptide_lists.xic_ft_results[i].spec_intensity;
+//            my_peptide_lists.xic_ft_results[a].XIC.push_back(x);
+//        }
+//        else if (my_peptide_lists.xic_ft_results[i].pep_seq != my_peptide_lists.xic_ft_results[i + 1].pep_seq) {
+//            x.rTime = my_peptide_lists.xic_ft_results[i].spec_rt;
+//            x.intensity = my_peptide_lists.xic_ft_results[i].spec_intensity;
+//            my_peptide_lists.xic_ft_results[a].XIC.push_back(x);
+//            a = i + 1;
+//        }
 //
-//	peptide_lists my_peptide_lists;
-//
-//	int c = 0;
-//	int d = 0;
-//    int e = 0; 
-//
-//	for (spectrum_node; spectrum_node; spectrum_node = spectrum_node->next_sibling())
-//	{
-//		if (string(spectrum_node->value()) == "msms_run_summary") {
-//			continue;
-//		}
-//
-//		switch (my_params.ident) {
-//		//IP
-//		case 'a':
-//			for (xml_node<>* sample_node = spectrum_node->first_node("spectrum_query"); sample_node; sample_node = sample_node->next_sibling())
-//			{
-//				for (xml_node<>* secondary_node = sample_node->first_node("search_result")->first_node("search_hit")->first_node("analysis_result"); secondary_node; secondary_node = secondary_node->next_sibling())
-//				{
-//					if (/*bool(secondary_node->first_attribute("analysis")) == 1 &&*/ string(secondary_node->first_attribute("analysis")->value()) == "interprophet") {
-//						if (atof(secondary_node->first_node("interprophet_result")->first_attribute("probability")->value()) >= 0.00) {
-//							d++;
-//						}
-//						if (atof(secondary_node->first_node("interprophet_result")->first_attribute("probability")->value()) >= my_params.ipro_prob) {
-//							my_peptide_lists.all.push_back(my_features());
-//							my_peptide_lists.all[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
-//							my_peptide_lists.all[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
-//							my_peptide_lists.all[c].mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
-//							my_peptide_lists.all[c].rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
-//							my_peptide_lists.all[c].prev_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value());
-//							my_peptide_lists.all[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
-//                            my_peptide_lists.all[c].prot_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("protein")->value());
-//                            my_peptide_lists.all[c].calc_mass = atof(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("calc_neutral_pep_mass")->value());
-//                            if (atoi(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("num_tot_proteins")->value()) == 1) {
-//                                my_peptide_lists.all[c].proteotypic = 1;
-//                            }
-//                            c++; 
-//						}
-//					}
-//				}
-//			}
-//			break; 
-//		//PP
-//		case 'b':
-//			for (xml_node<>* sample_node = spectrum_node->first_node("spectrum_query"); sample_node; sample_node = sample_node->next_sibling())
-//			{
-//				if (atof(sample_node->first_node("search_result")->first_node("search_hit")->first_node("analysis_result")->first_node("peptideprophet_result")->first_attribute("probability")->value()) >= 0.00) {
-//					d++;
-//				}
-//				if (atof(sample_node->first_node("search_result")->first_node("search_hit")->first_node("analysis_result")->first_node("peptideprophet_result")->first_attribute("probability")->value()) >= my_params.pep_prob) {
-//					my_peptide_lists.all.push_back(my_features());
-//					my_peptide_lists.all[c].pep_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide")->value());
-//					my_peptide_lists.all[c].charge = atoi(sample_node->first_attribute("assumed_charge")->value());
-//					my_peptide_lists.all[c].mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
-//					my_peptide_lists.all[c].rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
-//					my_peptide_lists.all[c].prev_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_prev_aa")->value());
-//					my_peptide_lists.all[c].next_aa = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("peptide_next_aa")->value());
-//                    my_peptide_lists.all[c].prot_seq = string(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("protein")->value());
-//                    my_peptide_lists.all[c].calc_mass = atof(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("calc_neutral_pep_mass")->value());
-//                    if (atoi(sample_node->first_node("search_result")->first_node("search_hit")->first_attribute("num_tot_proteins")->value()) == 1) {
-//                        my_peptide_lists.all[c].proteotypic = 1;
-//                    }
-//					c++;
-//				}
-//			}
-//			break;
-//		default:
-//			cout << "error" << endl; 
-//			exit(1);
-//			break; 
-//		}
-//
-//	}
-//	my_peptide_lists.total = d;
-//                                  
-//	return my_peptide_lists;
-//
-//}
-
-//TRYPTIC_CALC
-
-//bool deep_functions::tryptic_calc(peptide_lists& my_peptide_lists) {
-//
-//	int c = 0;
-//	int d = 0;
-//
-//	for (int i = 0; i < my_peptide_lists.all.size(); i++) {
-//
-//		if ((my_peptide_lists.all[i].prev_aa == "R" || my_peptide_lists.all[i].prev_aa == "K" || my_peptide_lists.all[i].prev_aa == "-") &&
-//			(my_peptide_lists.all[i].pep_seq.back() == 'R' || my_peptide_lists.all[i].pep_seq.back() == 'K' || my_peptide_lists.all[i].next_aa == "-")) {
-//
-//			my_peptide_lists.tryptic.push_back(my_features());
-//			my_peptide_lists.tryptic[c].pep_seq = my_peptide_lists.all[i].pep_seq;
-//			my_peptide_lists.tryptic[c].charge = my_peptide_lists.all[i].charge;
-//			my_peptide_lists.tryptic[c].mass = my_peptide_lists.all[i].mass;
-//			my_peptide_lists.tryptic[c].prev_aa = my_peptide_lists.all[i].prev_aa;
-//			my_peptide_lists.tryptic[c].rtime = my_peptide_lists.all[i].rtime;
-//			my_peptide_lists.tryptic[c].next_aa = my_peptide_lists.all[i].next_aa;
-//            my_peptide_lists.tryptic[c].prot_seq = my_peptide_lists.all[i].prot_seq;
-//            my_peptide_lists.tryptic[c].proteotypic = my_peptide_lists.all[i].proteotypic;
-//            my_peptide_lists.tryptic[c].calc_mass = my_peptide_lists.all[i].calc_mass;
-//
-//			c++;
-//		}
-//		else {
-//
-//			my_peptide_lists.non_tryptic.push_back(my_features());
-//			my_peptide_lists.non_tryptic[d].pep_seq = my_peptide_lists.all[i].pep_seq;
-//			my_peptide_lists.non_tryptic[d].charge = my_peptide_lists.all[i].charge;
-//			my_peptide_lists.non_tryptic[d].mass = my_peptide_lists.all[i].mass;
-//			my_peptide_lists.non_tryptic[d].prev_aa = my_peptide_lists.all[i].prev_aa;
-//			my_peptide_lists.non_tryptic[d].rtime = my_peptide_lists.all[i].rtime;
-//			my_peptide_lists.non_tryptic[d].next_aa = my_peptide_lists.all[i].next_aa;
-//            my_peptide_lists.non_tryptic[d].prot_seq = my_peptide_lists.all[i].prot_seq;
-//            my_peptide_lists.non_tryptic[d].proteotypic = my_peptide_lists.all[i].proteotypic;
-//            my_peptide_lists.non_tryptic[d].calc_mass = my_peptide_lists.all[i].calc_mass;
-//
-//			d++;
-//		}
-//		
-//	}
-//
-//	return true;
-//
-//}
-
-//MISS_CLEAVE
-
-//bool deep_functions::miss_cleave(peptide_lists& my_peptide_lists) {
-//
-//	int c = 0;
-//	for (int i = 0; i < my_peptide_lists.tryptic.size(); i++) {
-//		for (int j = 0; j < my_peptide_lists.tryptic[i].pep_seq.size() - 1; j++) {
-//			int k = j + 1;
-//			if ((my_peptide_lists.tryptic[i].pep_seq[j] == 'K' || my_peptide_lists.tryptic[i].pep_seq[j] == 'R') && my_peptide_lists.tryptic[i].pep_seq[k] != 'P') {
-//				c++;
-//			}
-//		}
-//		my_peptide_lists.tryptic[i].miss_cleaves = c;
-//		c = 0;
-//	}
-//
-//	return true;
-//
-//}
-
-//DELETE_DUP
-
-//bool deep_functions::delete_dup(peptide_lists& my_peptide_lists) {
-//
-//  //MH: I think this function is supposed to find the unique set of peptide sequences
-//  //from the complete list of tryptic PSMs. delete_dup is a misnomer. Nothing is deleted.
-//  //Instead new arrays of unique sequences are created.
-//  size_t i;
-//
-//  //MH: Sort the tryptic array by sequence and then charge state
-//  sort(my_peptide_lists.tryptic.begin(),my_peptide_lists.tryptic.end(),compareSeqZ);
-//
-//  //MH: Iterate over all tryptic PSMs, keeping each unique instance of sequence and charge
-//  my_peptide_lists.tryp_unique_z.push_back(my_peptide_lists.tryptic[0]);
-//  for(i=1;i<my_peptide_lists.tryptic.size();i++){
-//    if(my_peptide_lists.tryp_unique_z.back().pep_seq.compare(my_peptide_lists.tryptic[i].pep_seq)==0 &&
-//      my_peptide_lists.tryp_unique_z.back().charge == my_peptide_lists.tryptic[i].charge) continue;
-//    my_peptide_lists.tryp_unique_z.push_back(my_peptide_lists.tryptic[i]);
-//  }
-//
-//  //MH: Repeat the process, keeping each unique instance of sequence;
-//  my_peptide_lists.tryp_unique.push_back(my_peptide_lists.tryptic[0]);
-//  for (i = 1; i < my_peptide_lists.tryptic.size(); i++) {
-//    if (my_peptide_lists.tryp_unique.back().pep_seq.compare(my_peptide_lists.tryptic[i].pep_seq) == 0) continue;
-//    my_peptide_lists.tryp_unique.push_back(my_peptide_lists.tryptic[i]);
-//  }
-//
-//  //MH: Now of the unique peptide sequences, make a subset of miscleaved peptides
-//  i=0;
-//  while(my_peptide_lists.tryp_unique[i].miss_cleaves==0) i++; //no boundary checks here
-//  my_peptide_lists.miss_unique.push_back(my_peptide_lists.tryp_unique[i]);
-//  for (i = i+1; i < my_peptide_lists.tryp_unique.size(); i++) {
-//    if (my_peptide_lists.tryp_unique[i].miss_cleaves==0) continue;
-//    my_peptide_lists.miss_unique.push_back(my_peptide_lists.tryp_unique[i]);
-//  }
-//
-//  for (i = 0; i < my_peptide_lists.tryp_unique.size(); i++) {
-//      if (my_peptide_lists.tryp_unique[i].miss_cleaves != 0) continue; 
-//      my_peptide_lists.fully_tryp_unique.push_back(my_peptide_lists.tryp_unique[i]); 
-//  }
-//
-//
-//  
-//
-//
-//
-//
-//	return true;
-//
-//}
-
-//LCD
-
-//bool deep_functions::lcd(peptide_lists& my_peptide_lists) {
-//	
-//  
-//  //MH: This new method finds all miscleavages for each fully cleaved peptide, and stores them in a
-//  //new array.
-//
-//
-//    for (size_t i = 0; i < my_peptide_lists.fully_tryp_unique.size(); i++) {
-//        my_peptide_lists.fully_tryp_unique[i].mz = (my_peptide_lists.fully_tryp_unique[i].mass + (my_peptide_lists.fully_tryp_unique[i].charge * 1.00727)) / my_peptide_lists.fully_tryp_unique[i].charge;
 //    }
+//    vector<dsPeptide> tmp;
+//    tmp.push_back(my_peptide_lists.xic_ft_results[0]);
+//    for (size_t i = 1; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//        if (my_peptide_lists.xic_ft_results[i].pep_seq == my_peptide_lists.xic_ft_results[i - 1].pep_seq) continue;
+//        tmp.push_back(my_peptide_lists.xic_ft_results[i]);
+//    }
+//    my_peptide_lists.xic_ft_results = tmp;
+//    tmp.clear();
 //
-//    for (size_t i = 0; i < my_peptide_lists.miss_unique.size(); i++) {
-//        my_peptide_lists.miss_unique[i].mz = (my_peptide_lists.miss_unique[i].mass + (my_peptide_lists.miss_unique[i].charge * 1.00727)) / my_peptide_lists.miss_unique[i].charge;
+//
+//
+//    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//        if (my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i + 1].pep_seq) {
+//            x.rTime = my_peptide_lists.xic_mc_results[i].spec_rt;
+//            x.intensity = my_peptide_lists.xic_mc_results[i].spec_intensity;
+//            my_peptide_lists.xic_mc_results[b].XIC.push_back(x);
+//        }
+//        else if (my_peptide_lists.xic_mc_results[i].pep_seq != my_peptide_lists.xic_mc_results[i + 1].pep_seq) {
+//            x.rTime = my_peptide_lists.xic_mc_results[i].spec_rt;
+//            x.intensity = my_peptide_lists.xic_mc_results[i].spec_intensity;
+//            my_peptide_lists.xic_mc_results[b].XIC.push_back(x);
+//            b = i + 1;
+//        }
+//
+//    }
+//    tmp.push_back(my_peptide_lists.xic_mc_results[0]);
+//    for (size_t i = 1; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//        if (my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i - 1].pep_seq) continue;
+//        tmp.push_back(my_peptide_lists.xic_mc_results[i]);
+//    }
+//    my_peptide_lists.xic_mc_results = tmp;
+//
+//
+//
+//
+//
+//    //DELETE NOISE (INTENSITIES LESS THAN 10% OF THE MAX) (NOISE)
+//
+//    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//        if (!cleanNoise(my_peptide_lists.xic_ft_results[i].XIC)) {
+//            //handle error
+//        }
+//    }
+//    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//        if (!cleanNoise(my_peptide_lists.xic_mc_results[i].XIC)) {
+//            //handle error
+//        }
 //    }
 //
 //
 //
-//  //size_t i,j;
-//  //for(i=0;i<my_peptide_lists.tryp_unique.size();i++){
 //
-//  //  //MH: skip any peptides that have miscleavages
-//  //  if(my_peptide_lists.tryp_unique[i].miss_cleaves>0) continue;
-//
-//  //  for(j=0;j<my_peptide_lists.miss_unique.size();j++){
-//
-//  //    //MH: we have a match, make a new entry
-//  //    size_t found = my_peptide_lists.miss_unique[j].pep_seq.find(my_peptide_lists.tryp_unique[i].pep_seq);
-//  //    if(found != string::npos && my_peptide_lists.miss_unique[j].pep_seq.compare(my_peptide_lists.tryp_unique[i].pep_seq)!=0) {
-//  //      my_features f= my_peptide_lists.miss_unique[j];
-//  //      f.d_pep_seq = my_peptide_lists.tryp_unique[i].pep_seq;
-//  //      f.d_pep_seq_rt = my_peptide_lists.tryp_unique[i].rtime;
-//  //      f.d_miss_cleaves = my_peptide_lists.tryp_unique[i].miss_cleaves;
-//  //      f.d_pep_seq_mass = my_peptide_lists.tryp_unique[i].mass;
-//  //      f.d_pep_seq_charge = my_peptide_lists.tryp_unique[i].charge;
-//  //      if (found == 0) {
-//  //        f.cleave_loc = 'R';
-//  //        f.cleave_pos = 0;
-//  //      } else {
-//  //        f.cleave_loc = 'L';
-//  //        f.cleave_pos = (int)found;
-//  //      }
-//  //      f.mz = (f.mass + (f.charge * 1.00727)) / f.charge;
-//  //      f.d_pep_seq_mz = (f.d_pep_seq_mass + (f.d_pep_seq_charge * 1.00727)) / f.d_pep_seq_charge;
-//  //      my_peptide_lists.d_list.push_back(f);
-//  //    }
-//
-//  //  }
-//
-//  //}
-//
-//
-//  
-//
-//
-//
-//  
-//  //MH: I think this approach is flawed. MISCLVDRSEQENCEK is a miscleavage of both MISCLVDR and SEQENCEK
-//  //Therefore it isn't possible to have only a single tryptic representation for each miscleavage.
-//	///*for (int i = 0; i < my_peptide_lists.miss_unique.size(); i++) {
-//	//	for (int j = 0; j < my_peptide_lists.tryp_unique.size(); j++) {
-//	//		size_t found = my_peptide_lists.miss_unique[i].pep_seq.find(my_peptide_lists.tryp_unique[j].pep_seq);
-//	//		if (found != string::npos && (my_peptide_lists.miss_unique[i].pep_seq != my_peptide_lists.tryp_unique[j].pep_seq)) {
-//	//			my_peptide_lists.miss_unique[i].d_pep_seq = my_peptide_lists.tryp_unique[j].pep_seq;
-//	//			my_peptide_lists.miss_unique[i].d_pep_seq_rt = my_peptide_lists.tryp_unique[j].rtime;
-//	//			my_peptide_lists.miss_unique[i].d_miss_cleaves = my_peptide_lists.tryp_unique[j].miss_cleaves;
-//	//			if (found == 0) {
-//	//				my_peptide_lists.miss_unique[i].cleave_loc = 'R';
-//	//				my_peptide_lists.miss_unique[i].cleave_pos = (int)found;
-//
-//	//			}
-//	//			else {
-//	//				my_peptide_lists.miss_unique[i].cleave_loc = 'L';
-//	//				my_peptide_lists.miss_unique[i].cleave_pos = (int)found;
-//
-//	//			}
-//	//			my_peptide_lists.miss_unique[i].d_pep_seq_mass = my_peptide_lists.tryp_unique[j].mass;
-//	//			my_peptide_lists.miss_unique[i].d_pep_seq_charge = my_peptide_lists.tryp_unique[j].charge;
-//	//		}
-//
-//	//	}
-//
-//	//	my_peptide_lists.miss_unique[i].mz = (my_peptide_lists.miss_unique[i].mass + ((my_peptide_lists.miss_unique[i].charge) * 1.00727)) / my_peptide_lists.miss_unique[i].charge;
-//	//	my_peptide_lists.miss_unique[i].d_pep_seq_mz = (my_peptide_lists.miss_unique[i].d_pep_seq_mass + ((my_peptide_lists.miss_unique[i].d_pep_seq_charge) * 1.00727)) / my_peptide_lists.miss_unique[i].d_pep_seq_charge;
-//	//}*/
-//
-//
-//
-//
-//	/*for (int i = 0; i < my_peptide_lists.tryp_unique.size(); i++) {
-//		cout << my_peptide_lists.tryp_unique[i].pep_seq << "  " << my_peptide_lists.tryp_unique[i].charge << "   " << my_peptide_lists.tryp_unique[i].mass << "  " << my_peptide_lists.tryp_unique[i].mz << "  " << my_peptide_lists.tryp_unique[i].cleave_loc << "   " << my_peptide_lists.tryp_unique[i].cleave_pos  << "   " << my_peptide_lists.tryp_unique[i].d_pep_seq << "  " << my_peptide_lists.tryp_unique[i].d_pep_seq_charge << "  " << my_peptide_lists.tryp_unique[i].d_pep_seq_mass << "  " << my_peptide_lists.tryp_unique[i].d_pep_seq_mz << endl;
-//	}*/
-//
-//	/*cout << my_peptide_lists.tryp_unique.size() << endl;*/
-//
-//
-//
-//	return true; 
-//
-//}
-
-//NEW_LIST -> OBSOLETE
-
-//peptide_lists deep_functions::new_list(peptide_lists& my_peptide_lists) {
-//
-//	my_peptide_lists.d_list = my_peptide_lists.miss_unique; 
-//	
-//	for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
-//		if (my_peptide_lists.d_list[i].d_pep_seq.size() == 0 ){
-//			my_peptide_lists.d_list.erase(my_peptide_lists.d_list.begin() + i);
-//			i = i - 1;
-//		}
-//
-//	}
-//
-//
-//
-//	/*for (int i = 0; i < my_peptide_lists.d_list.size(); i++) {
-//		cout << my_peptide_lists.d_list[i].pep_seq << "  " << my_peptide_lists.d_list[i].charge << "   " << my_peptide_lists.d_list[i].mass << "  " << my_peptide_lists.d_list[i].mz << "  " << my_peptide_lists.d_list[i].cleave_loc << "   " << my_peptide_lists.d_list[i].cleave_pos << " ||||| " << my_peptide_lists.d_list[i].d_pep_seq << "  " << my_peptide_lists.d_list[i].d_pep_seq_charge << "  " << my_peptide_lists.d_list[i].d_pep_seq_mass << "  " << my_peptide_lists.d_list[i].d_pep_seq_mz << endl;
-//	}*/
-//
-//
-//	cout << my_peptide_lists.d_list.size() << endl;
-//
-//	return my_peptide_lists;
-//
-//}
-
-//READER
-
-//bool deep_functions::reader(peptide_lists& my_peptide_lists, metrics& my_metrics, match_lists& my_match_lists) {
-//
-//  vector<my_intensities> qc;
-//
-//  //MH: Again, sorting is your friend here. Although these vectors are already sorted, so we won't do that.
-//  //But because they are sorted, you can get through in a single pass. And you won't need to erase
-//  //which will save tons of time.
-//  for (size_t i = 0; i < my_match_lists.results.size(); i++) {
-//    my_peptide_lists.spectra.push_back(my_intensities()); //add first one
-//    my_peptide_lists.spectra.back().x = my_match_lists.results[i].spec_rt;
-//    my_peptide_lists.spectra.back().y = my_match_lists.results[i].spec_intensity;
-//    my_peptide_lists.spectra.back().seq = my_match_lists.results[i].pep_seq;
-//    my_peptide_lists.spectra.back().mc = my_match_lists.results[i].miss_cleaves;
-//    my_peptide_lists.spectra.back().prot_seq = my_match_lists.results[i].prot_seq;
-//    my_peptide_lists.spectra.back().proteotypic = my_match_lists.results[i].proteotypic;
-//
-//  }
-//
-//
-//  /*for (int i = 0; i < 10; i++) {
-//      cout << my_peptide_lists.spectra[i].seq << "   " << my_peptide_lists.spectra[i].prot_seq << "  " << my_peptide_lists.spectra[i].proteotypic << endl; 
-//  }
-//
-//  cout << "======" << endl; */
-//
-//  my_peptide_lists.master.push_back(qc);
-//  my_peptide_lists.master.back().push_back(my_peptide_lists.spectra[0]);
-//  for (size_t i = 1; i < my_peptide_lists.spectra.size(); i++) {
-//    if (my_peptide_lists.spectra[i].seq != my_peptide_lists.spectra[i - 1].seq) {
-//      my_peptide_lists.master.push_back(qc);
+//    //delete peptides with only one data point
+//    vector<dsPeptide> filter;
+//    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//        if (my_peptide_lists.xic_ft_results[i].XIC.size() > 1) {
+//            filter.push_back(my_peptide_lists.xic_ft_results[i]);
+//        }
 //    }
-//    my_peptide_lists.master.back().push_back(my_peptide_lists.spectra[i]);
-//  }
-//
-//  //MH: Repeat for the other list
-//  for (size_t i = 0; i < my_match_lists.results1.size(); i++) {
-//    my_peptide_lists.spectra1.push_back(my_intensities()); //add first one
-//    my_peptide_lists.spectra1.back().x = my_match_lists.results1[i].spec_rt;
-//    my_peptide_lists.spectra1.back().y = my_match_lists.results1[i].spec_intensity;
-//    my_peptide_lists.spectra1.back().seq = my_match_lists.results1[i].pep_seq;
-//    my_peptide_lists.spectra1.back().mc = my_match_lists.results1[i].miss_cleaves;
-//    my_peptide_lists.spectra1.back().prot_seq = my_match_lists.results1[i].prot_seq;
-//    my_peptide_lists.spectra1.back().proteotypic = my_match_lists.results1[i].proteotypic;
-//  }
-//
-// /* for (int i = 0; i < 10; i++) {
-//      cout << my_peptide_lists.spectra1[i].seq << "   " << my_peptide_lists.spectra1[i].prot_seq << "  " << my_peptide_lists.spectra1[i].proteotypic << endl;
-//  }*/
-//
-//
-//  my_peptide_lists.master1.push_back(qc);
-//  my_peptide_lists.master1.back().push_back(my_peptide_lists.spectra1[0]);
-//  for (size_t i = 1; i < my_peptide_lists.spectra1.size(); i++) {
-//    if (my_peptide_lists.spectra1[i].seq != my_peptide_lists.spectra1[i - 1].seq) {
-//      my_peptide_lists.master1.push_back(qc);
+//    my_peptide_lists.xic_ft_results = filter;
+//    filter.clear();
+//    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//        if (my_peptide_lists.xic_mc_results[i].XIC.size() > 1) {
+//            filter.push_back(my_peptide_lists.xic_mc_results[i]);
+//        }
 //    }
-//    my_peptide_lists.master1.back().push_back(my_peptide_lists.spectra1[i]);
-//  }
+//    my_peptide_lists.xic_mc_results = filter;
+//    filter.clear();
 //
 //
-//  //DELETE NOISE (INTENSITIES LESS THAN 10% OF THE MAX) (NOISE)
-//  //MH: The faster, simpler approach
-//  for(size_t i=0;i<my_peptide_lists.master.size();i++){
-//    if(!cleanNoise(my_peptide_lists.master[i])){
-//      //handle error
+//
+//    cout << "noise deleted" << "\n" << endl;
+//
+//
+//    //metric calculations
+//    vector<float> peak;
+//    float avg = 0;
+//    for (int i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//        for (int j = 0; j < my_peptide_lists.xic_ft_results[i].XIC.size(); j++) {
+//            peak.push_back(my_peptide_lists.xic_ft_results[i].XIC[j].intensity);
+//        }
+//        avg += *max_element(peak.begin(), peak.end());
+//        peak.clear();
 //    }
-//  }
-//  for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
-//    if (!cleanNoise(my_peptide_lists.master1[i])) {
-//      //handle error
-//    }
-//  }
-//
-//  ///*for (size_t i = 0; i < my_peptide_lists.master.size(); i++) {
-//  //  vector<float> rn;
-//  //  rn = cleanNoise(my_peptide_lists.master[i]);
-//
-//  //  for (size_t n = 0; n < my_peptide_lists.master[i].size() - 1; n++) {
-//  //    for (size_t p = n + 1; p < my_peptide_lists.master[i].size(); p++) {
-//  //      vector<float>::iterator it;
-//  //      it = find(rn.begin(), rn.end(), my_peptide_lists.master[i][p].y);
-//  //      if (it == rn.end()) {
-//  //        my_peptide_lists.master[i].erase(my_peptide_lists.master[i].begin() + p);
-//  //        p = (n + 1) - 1;
-//  //      }
-//  //    }
-//  //  }
-//  //  for (size_t n = 0; n < my_peptide_lists.master[i].size(); n++) {
-//  //    vector<float>::iterator it;
-//  //    it = find(rn.begin(), rn.end(), my_peptide_lists.master[i][n].y);
-//  //    if (it == rn.end()) {
-//  //      my_peptide_lists.master[i].erase(my_peptide_lists.master[i].begin() + n);
-//  //    }
-//  //  }
-//  //  rn.clear();
-//  //}
-//
-//  //for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
-//  //  vector<float> rn1;
-//  //  rn1 = cleanNoise(my_peptide_lists.master1[i]);
-//
-//  //  for (size_t n = 0; n < my_peptide_lists.master1[i].size() - 1; n++) {
-//  //    for (size_t p = n + 1; p < my_peptide_lists.master1[i].size(); p++) {
-//  //      vector<float>::iterator it;
-//  //      it = find(rn1.begin(), rn1.end(), my_peptide_lists.master1[i][p].y);
-//  //      if (it == rn1.end()) {
-//  //        my_peptide_lists.master1[i].erase(my_peptide_lists.master1[i].begin() + p);
-//  //        p = (n + 1) - 1;
-//  //      }
-//  //    }
-//  //  }
-//  //  for (size_t n = 0; n < my_peptide_lists.master1[i].size(); n++) {
-//  //    vector<float>::iterator it;
-//  //    it = find(rn1.begin(), rn1.end(), my_peptide_lists.master1[i][n].y);
-//  //    if (it == rn1.end()) {
-//  //      my_peptide_lists.master1[i].erase(my_peptide_lists.master1[i].begin() + n);
-//  //    }
-//  //  }
-//  //  rn1.clear();
-//  //}*/
-//
-//  // END NOISE FUNCTION 
 //
 //
-//  //delete peptides with only one data point
-//  vector<vector<my_intensities>> filter;
-//  for (size_t i = 0; i < my_peptide_lists.master.size(); i++) {
-//    if (my_peptide_lists.master[i].size() > 1) {
-//      filter.push_back(my_peptide_lists.master[i]);
-//    }
-//  }
-//  my_peptide_lists.master = filter;
-//  filter.clear();
-//  for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
-//    if (my_peptide_lists.master1[i].size() > 1) {
-//      filter.push_back(my_peptide_lists.master1[i]);
-//    }
-//  }
-//  my_peptide_lists.master1 = filter;
-//  filter.clear();
+//    my_metrics.tryp_avg_high = avg / my_peptide_lists.xic_ft_results.size();
 //
-//
-//
-//
-//  
-//
-//
-//
-//  cout << "noise deleted" << "\n" << endl;
-//
-//
-//  //metric calculations
-//  vector<float> peak;
-//  float avg=0;
-//  //MH: this array isn't necessary
-//  //vector<float> peak2; 
-//  for (int i = 0; i < my_peptide_lists.master.size(); i++) {
-//    for (int j = 0; j < my_peptide_lists.master[i].size(); j++) {
-//      peak.push_back(my_peptide_lists.master[i][j].y);
-//    }
-//    avg+= *max_element(peak.begin(), peak.end());
-//    //peak2.push_back(*max_element(peak.begin(), peak.end()));
 //    peak.clear();
-//  }
-//
-//
-//  //float sum = 0; for (int i = 0; i < peak2.size(); ++i) { sum += peak2[i]; }
-//  //float sumi = sum / peak2.size();
-//  my_metrics.miss_avg_high = avg/ my_peptide_lists.master.size();
-//
-//  peak.clear();
-//  avg=0;
-//  //vector<float> peak1;
-//  //vector<float> peak3;
-//  for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
-//    for (int j = 0; j < my_peptide_lists.master1[i].size(); j++) {
-//      peak.push_back(my_peptide_lists.master1[i][j].y);
+//    avg = 0;
+//    for (int i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//        for (int j = 0; j < my_peptide_lists.xic_mc_results[i].XIC.size(); j++) {
+//            peak.push_back(my_peptide_lists.xic_mc_results[i].XIC[j].intensity);
+//        }
+//        avg += *max_element(peak.begin(), peak.end());
+//        peak.clear();
 //    }
-//    avg += *max_element(peak.begin(), peak.end());
-//    //peak3.push_back(*max_element(peak1.begin(), peak1.end()));
-//    peak.clear();
-//  }
 //
 //
-//  //float sum1 = 0; for (int i = 0; i < peak3.size(); ++i) { sum1 += peak3[i]; }
-//  //float sumi1 = sum1 / peak3.size();
-//  my_metrics.tryp_avg_high = avg/ my_peptide_lists.master1.size();
-//
-//  //MH: Calculating area is something performed on multiple arrays. So create a function
-//  // that does it on any array you pass to it. Also, have it return the total rather than
-//  // iterate the array again to count the total.
-//  for (size_t i = 0; i < my_peptide_lists.master.size(); i++) {
-//    my_peptide_lists.master[i].back().tot = calcPeakArea(my_peptide_lists.master[i]);
-//  }
-//  for (size_t i = 0; i < my_peptide_lists.master1.size(); i++) {
-//    my_peptide_lists.master1[i].back().tot = calcPeakArea(my_peptide_lists.master1[i]);
-//  }
+//    my_metrics.miss_avg_high = avg / my_peptide_lists.xic_mc_results.size();
 //
 //
-//  vector<my_intensities> final;
-//  int cycle = 0;
-//  for (int i = 0; i < my_peptide_lists.master.size(); i++) {
-//    final.push_back(my_intensities());
-//    final[cycle].seq = my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].seq;
-//    final[cycle].tot = my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].tot;
-//    final[cycle].mc = my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].mc;
-//    final[cycle].prot_seq = my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].prot_seq;
-//    final[cycle].proteotypic = my_peptide_lists.master[i][my_peptide_lists.master[i].size() - 1].proteotypic;
-//    cycle++;
-//  }
+//    float big = 0;
+//    float big1 = 0;
+//    //CALC AREA 
+//    for (size_t i = 0; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//        my_peptide_lists.xic_ft_results[i].areaXIC = calcPeakArea(my_peptide_lists.xic_ft_results[i].XIC);
+//        big += my_peptide_lists.xic_ft_results[i].areaXIC;
+//    }
+//    for (size_t i = 0; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//        my_peptide_lists.xic_mc_results[i].areaXIC = calcPeakArea(my_peptide_lists.xic_mc_results[i].XIC);
+//        big1 += my_peptide_lists.xic_mc_results[i].areaXIC;
+//    }
 //
-//  vector<my_intensities> final1;
-//  int cycle1 = 0;
-//  for (int i = 0; i < my_peptide_lists.master1.size(); i++) {
-//    final1.push_back(my_intensities());
-//    final1[cycle1].seq = my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].seq;
-//    final1[cycle1].tot = my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].tot;
-//    final1[cycle1].mc = my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].mc;
-//    final1[cycle1].prot_seq = my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].prot_seq;
-//    final1[cycle1].proteotypic = my_peptide_lists.master1[i][my_peptide_lists.master1[i].size() - 1].proteotypic;
-//    cycle1++;
-//  }
+//    my_metrics.total_intensity = big1 / (big + big1);
 //
-//  my_peptide_lists.final = final;
-//  my_peptide_lists.final1 = final1;
-//
-//  // END AREA FUNCTION
+//    // END AREA FUNCTION
 //
 //
-//  cout << "intensity calculated" << "\n" << endl;
+//    cout << "intensity calculated" << "\n" << endl;
 //
 //
 //
 //
-//  return true;
+//    return true;
 //
 //}
 
@@ -1178,7 +650,7 @@ metrics deep_functions::calc(peptide_lists& my_peptide_lists, metrics& my_metric
 
 
 	my_metrics.total_psm = my_peptide_lists.total;
-	my_metrics.psm_num = my_peptide_lists.all_real.size();
+	my_metrics.psm_num = my_peptide_lists.all_psm.size();
 	my_metrics.tryptic_num = my_peptide_lists.tryptic_real.size();
 	my_metrics.nontryptic_num = my_peptide_lists.non_tryptic_real.size();
 	my_metrics.unique_pep_charge = my_peptide_lists.tryp_unique_z_real.size();
@@ -1466,6 +938,11 @@ void deep_functions::print(peptide_lists& my_peptide_lists, metrics& my_metrics)
 
 void deep_functions::json(peptide_lists& my_peptide_lists, string fn) {
     
+   /* sort(my_peptide_lists.prot_f.begin(), my_peptide_lists.prot_f.end(), compareTotal);
+    for (int i = 0; i < 500; i++) {
+        cout << my_peptide_lists.prot_f[i].total << endl; 
+  }
+   cout<< my_peptide_lists.prot_f.size() << endl;*/
   StringBuffer s;
   PrettyWriter<StringBuffer> writer(s);
      
@@ -1489,6 +966,8 @@ void deep_functions::json(peptide_lists& my_peptide_lists, string fn) {
       writer.String(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].pep_seq.c_str());
       writer.Key("Abundance");
       writer.Double(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].areaXIC);
+      writer.Key("PSM Counts");
+      writer.Int(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].trypPeptides[j]].psm_count);
       writer.EndObject();
     }
     writer.EndArray();
@@ -1500,6 +979,8 @@ void deep_functions::json(peptide_lists& my_peptide_lists, string fn) {
       writer.String(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].pep_seq.c_str());
       writer.Key("Abundance");
       writer.Double(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].areaXIC);
+      writer.Key("PSM Counts");
+      writer.Int(my_peptide_lists.prot_f_real[i][my_peptide_lists.prot_f[i].missPeptides[j]].psm_count); 
       writer.EndObject();
     }
     writer.EndArray();

@@ -18,7 +18,7 @@ peptide_lists scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& 
 	//To do so, we need to do it a) using a single pass through all arrays, and
 	//b) using fast lookups instead of full iteration.
 	//Step 1 is to sort my_peptide_lists.dlist
-	sort(my_peptide_lists.fully_tryp_unique_real.begin(), my_peptide_lists.fully_tryp_unique_real.end(), compareRTime);
+	sort(my_peptide_lists.enzymatic_unique.begin(), my_peptide_lists.enzymatic_unique.end(), compareRTime);
 	size_t pepIndex = 0; // we will start from the first sorted peptide
 
 
@@ -29,30 +29,34 @@ peptide_lists scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& 
 		//MH: Instead of iterating over all peptides, just iterate over the ones related to this spectrum
 		//First we adjust our start point to the next peptide that falls within our RT window
 		size_t i = pepIndex;
-		while (i < my_peptide_lists.fully_tryp_unique_real.size() && (my_peptide_lists.fully_tryp_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
-		if (i == my_peptide_lists.fully_tryp_unique_real .size()) break; //if we've checked every peptide, stop now.
+		while (i < my_peptide_lists.enzymatic_unique.size() && (my_peptide_lists.enzymatic_unique[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
+		if (i == my_peptide_lists.enzymatic_unique.size()) break; //if we've checked every peptide, stop now.
 		pepIndex = i; //mark our new start point for the next iteration
 
 		//MH: From here, iterate over all peptides until we reach the end of our RT window
-		while (i < my_peptide_lists.fully_tryp_unique_real.size() && (my_peptide_lists.fully_tryp_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
+		while (i < my_peptide_lists.enzymatic_unique.size() && (my_peptide_lists.enzymatic_unique[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
 
 			//MH: Now we have to check for the peak itself in this spectrum.
 			//Instead of iterating over the whole spectrum, just do a binary search to
 			//rapidly find the position in the array.
-			int ret = findPeakMZ(mySpec, my_peptide_lists.fully_tryp_unique_real[i].xml_mz, my_peptide_lists.fully_tryp_unique_real[i].tolerance);
+			int ret = findPeakMZ(mySpec, my_peptide_lists.enzymatic_unique[i].xml_mz, my_peptide_lists.enzymatic_unique[i].tolerance);
 			if (ret > -1) {
-				my_peptide_lists.xic_ft_results.push_back(dsPeptide());
-				my_peptide_lists.xic_ft_results.back().spec_sn = mySpec.getScanNumber(); //input
-				my_peptide_lists.xic_ft_results.back().spec_size = mySpec.size(); //input
-				my_peptide_lists.xic_ft_results.back().spec_mz = mySpec[ret].mz; //input
-				my_peptide_lists.xic_ft_results.back().xml_rtime = my_peptide_lists.fully_tryp_unique_real[i].xml_rtime / 60; // input
-				my_peptide_lists.xic_ft_results.back().spec_rt = mySpec.getRTime(); //input
-				my_peptide_lists.xic_ft_results.back().spec_intensity = mySpec[ret].intensity; //input;
-				my_peptide_lists.xic_ft_results.back().xml_mz = my_peptide_lists.fully_tryp_unique_real[i].xml_mz; //input   
-				my_peptide_lists.xic_ft_results.back().pep_seq = my_peptide_lists.fully_tryp_unique_real[i].pep_seq; //input 
-				my_peptide_lists.xic_ft_results.back().miss_cleaves = my_peptide_lists.fully_tryp_unique_real[i].miss_cleaves;
-				my_peptide_lists.xic_ft_results.back().prot_seq = my_peptide_lists.fully_tryp_unique_real[i].prot_seq;
-				my_peptide_lists.xic_ft_results.back().proteotypic = my_peptide_lists.fully_tryp_unique_real[i].proteotypic;
+				my_peptide_lists.enzymatic_unique.push_back(dsPeptide());
+				my_peptide_lists.enzymatic_unique.back().spec_sn = mySpec.getScanNumber();
+				my_peptide_lists.enzymatic_unique.back().spec_size = mySpec.size();
+				my_peptide_lists.enzymatic_unique.back().spec_mz = mySpec[ret].mz;
+				my_peptide_lists.enzymatic_unique.back().spec_rt = mySpec.getRTime();
+				my_peptide_lists.enzymatic_unique.back().spec_intensity = mySpec[ret].intensity;
+				my_peptide_lists.enzymatic_unique.back().xml_rtime = my_peptide_lists.enzymatic_unique[i].xml_rtime / 60; // input
+				my_peptide_lists.enzymatic_unique.back().xml_mz = my_peptide_lists.enzymatic_unique[i].xml_mz; //input   
+				my_peptide_lists.enzymatic_unique.back().pep_seq = my_peptide_lists.enzymatic_unique[i].pep_seq; //input 
+				my_peptide_lists.enzymatic_unique.back().miss_cleaves = my_peptide_lists.enzymatic_unique[i].miss_cleaves;
+				my_peptide_lists.enzymatic_unique.back().prot_seq = my_peptide_lists.enzymatic_unique[i].prot_seq;
+				my_peptide_lists.enzymatic_unique.back().proteotypic = my_peptide_lists.enzymatic_unique[i].proteotypic;
+				my_peptide_lists.enzymatic_unique.back().calc_neutral_mass = my_peptide_lists.enzymatic_unique[i].calc_neutral_mass;
+				my_peptide_lists.enzymatic_unique.back().enzymatic = my_peptide_lists.enzymatic_unique[i].enzymatic;
+				my_peptide_lists.enzymatic_unique.back().pre_neutral_mass = my_peptide_lists.enzymatic_unique[i].pre_neutral_mass;
+				my_peptide_lists.enzymatic_unique.back().psm_count = my_peptide_lists.enzymatic_unique[i].psm_count;
 			}
 
 			//MH: go to the next peptide
@@ -65,159 +69,236 @@ peptide_lists scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& 
 
 
 
-	cout << "pass 1 done" << "\n" << endl;
+	/*cout << "mzml parse done" << "\n" << endl;*/
 
 
 
 
-	sort(my_peptide_lists.xic_ft_results.begin(), my_peptide_lists.xic_ft_results.end(), compareSeqScan);
+	sort(my_peptide_lists.enzymatic_unique.begin(), my_peptide_lists.enzymatic_unique.end(), compareSeqScan);
 	vector<dsPeptide> tmp;
-	tmp.push_back(my_peptide_lists.xic_ft_results[0]); //First entry is always novel
-	for (size_t i = 1; i < my_peptide_lists.xic_ft_results.size(); i++) {
+	tmp.push_back(my_peptide_lists.enzymatic_unique[0]); //First entry is always novel
+	for (size_t i = 1; i < my_peptide_lists.enzymatic_unique.size(); i++) {
 		//skip duplicates
-		if ((my_peptide_lists.xic_ft_results[i].pep_seq == my_peptide_lists.xic_ft_results[i - 1].pep_seq) && (my_peptide_lists.xic_ft_results[i].spec_sn == my_peptide_lists.xic_ft_results[i - 1].spec_sn)) continue;
+		if ((my_peptide_lists.enzymatic_unique[i].pep_seq == my_peptide_lists.enzymatic_unique[i - 1].pep_seq) && (my_peptide_lists.enzymatic_unique[i].spec_sn == my_peptide_lists.enzymatic_unique[i - 1].spec_sn)) continue;
 		//keep novel entries
-		tmp.push_back(my_peptide_lists.xic_ft_results[i]);
+		tmp.push_back(my_peptide_lists.enzymatic_unique[i]);
 	}
-	my_peptide_lists.xic_ft_results = tmp; //copy the vector back
+	my_peptide_lists.enzymatic_unique = tmp; //copy the vector back
 
 
 
 
 
-	//MH: Now resort the list for d_pep
-	sort(my_peptide_lists.miss_unique_real.begin(), my_peptide_lists.miss_unique_real.end(), compareRTime);
-	pepIndex = 0; // reset our index	
+	////MH: Now resort the list for d_pep
+	//sort(my_peptide_lists.miss_unique_real.begin(), my_peptide_lists.miss_unique_real.end(), compareRTime);
+	//pepIndex = 0; // reset our index	
 
-	//MH: Restart reading our mzML file. Note, this could all be done in one pass, instead of two.
-	myfile.readFile(my_params.mzml.c_str(), mySpec);
-	while (mySpec.getRTime() != 0) {
-
-		size_t i = pepIndex;
-		while (i < my_peptide_lists.miss_unique_real.size() && (my_peptide_lists.miss_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
-		if (i == my_peptide_lists.miss_unique_real.size()) break; //if we've checked every peptide, stop now.
-		pepIndex = i; //mark our new start point for the next iteration
-
-		while (i < my_peptide_lists.miss_unique_real.size() && (my_peptide_lists.miss_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
-			int ret = findPeakMZ(mySpec, my_peptide_lists.miss_unique_real[i].xml_mz, my_peptide_lists.miss_unique_real[i].tolerance);
-			if (ret > -1) {
-				my_peptide_lists.xic_mc_results.push_back(dsPeptide());
-				my_peptide_lists.xic_mc_results.back().spec_sn = mySpec.getScanNumber(); //input
-				my_peptide_lists.xic_mc_results.back().spec_size = mySpec.size(); //input
-				my_peptide_lists.xic_mc_results.back().spec_mz = mySpec[ret].mz; //input
-				my_peptide_lists.xic_mc_results.back().xml_rtime = my_peptide_lists.miss_unique_real[i].xml_rtime / 60; // input
-				my_peptide_lists.xic_mc_results.back().spec_rt = mySpec.getRTime(); //input
-				my_peptide_lists.xic_mc_results.back().spec_intensity = mySpec[ret].intensity; //input;
-				my_peptide_lists.xic_mc_results.back().xml_mz = my_peptide_lists.miss_unique_real[i].xml_mz; //input   
-				my_peptide_lists.xic_mc_results.back().pep_seq = my_peptide_lists.miss_unique_real[i].pep_seq; //input 
-				my_peptide_lists.xic_mc_results.back().miss_cleaves = my_peptide_lists.miss_unique_real[i].miss_cleaves;
-				my_peptide_lists.xic_mc_results.back().prot_seq = my_peptide_lists.miss_unique_real[i].prot_seq;
-				my_peptide_lists.xic_mc_results.back().proteotypic = my_peptide_lists.miss_unique_real[i].proteotypic;
-			}
-			i++;//MH: go to the next peptide
-		}
-		myfile.readFile(NULL, mySpec);
-	}
-
-
-
-
-	cout << "pass 2 done" << "\n" << endl;
-
-
-
-
-	//MH: Delete duplicates again.
-	sort(my_peptide_lists.xic_mc_results.begin(), my_peptide_lists.xic_mc_results.end(), compareSeqScan);
-	tmp.clear(); //clear our old tmp vector
-	tmp.push_back(my_peptide_lists.xic_mc_results[0]);
-	for (size_t i = 1; i < my_peptide_lists.xic_mc_results.size(); i++) {
-		if ((my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i - 1].pep_seq) && (my_peptide_lists.xic_mc_results[i].spec_sn == my_peptide_lists.xic_mc_results[i - 1].spec_sn)) continue;
-		tmp.push_back(my_peptide_lists.xic_mc_results[i]);
-	}
-	my_peptide_lists.xic_mc_results = tmp;
-
-
-
-
-	/*cout << my_peptide_lists.xic_ft_results.size() << endl; 
-	cout << my_peptide_lists.xic_mc_results.size() << endl; */
-
-
-
-
-	////Step 1 is to sort my_peptide_lists.dlist
-	//sort(my_peptide_lists.semi_tryptic_unique_real.begin(), my_peptide_lists.semi_tryptic_unique_real.end(), compareRTime);
-	//pepIndex = 0; // we will start from the first sorted peptide
-
-
-	//
+	////MH: Restart reading our mzML file. Note, this could all be done in one pass, instead of two.
+	//myfile.readFile(my_params.mzml.c_str(), mySpec);
 	//while (mySpec.getRTime() != 0) {
 
-	//	//MH: Instead of iterating over all peptides, just iterate over the ones related to this spectrum
-	//	//First we adjust our start point to the next peptide that falls within our RT window
 	//	size_t i = pepIndex;
-	//	while (i < my_peptide_lists.semi_tryptic_unique_real.size() && (my_peptide_lists.semi_tryptic_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
-	//	if (i == my_peptide_lists.semi_tryptic_unique_real.size()) break; //if we've checked every peptide, stop now.
+	//	while (i < my_peptide_lists.miss_unique_real.size() && (my_peptide_lists.miss_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
+	//	if (i == my_peptide_lists.miss_unique_real.size()) break; //if we've checked every peptide, stop now.
 	//	pepIndex = i; //mark our new start point for the next iteration
 
-	//	//MH: From here, iterate over all peptides until we reach the end of our RT window
-	//	while (i < my_peptide_lists.semi_tryptic_unique_real.size() && (my_peptide_lists.semi_tryptic_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
-
-	//		//MH: Now we have to check for the peak itself in this spectrum.
-	//		//Instead of iterating over the whole spectrum, just do a binary search to
-	//		//rapidly find the position in the array.
-	//		int ret = findPeakMZ(mySpec, my_peptide_lists.semi_tryptic_unique_real[i].xml_mz, my_peptide_lists.semi_tryptic_unique_real[i].tolerance);
+	//	while (i < my_peptide_lists.miss_unique_real.size() && (my_peptide_lists.miss_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
+	//		int ret = findPeakMZ(mySpec, my_peptide_lists.miss_unique_real[i].xml_mz, my_peptide_lists.miss_unique_real[i].tolerance);
 	//		if (ret > -1) {
-	//			my_peptide_lists.xic_st_results.push_back(dsPeptide());
-	//			my_peptide_lists.xic_st_results.back().spec_sn = mySpec.getScanNumber(); //input
-	//			my_peptide_lists.xic_st_results.back().spec_size = mySpec.size(); //input
-	//			my_peptide_lists.xic_st_results.back().spec_mz = mySpec[ret].mz; //input
-	//			my_peptide_lists.xic_st_results.back().xml_rtime = my_peptide_lists.semi_tryptic_unique_real[i].xml_rtime / 60; // input
-	//			my_peptide_lists.xic_st_results.back().spec_rt = mySpec.getRTime(); //input
-	//			my_peptide_lists.xic_st_results.back().spec_intensity = mySpec[ret].intensity; //input;
-	//			my_peptide_lists.xic_st_results.back().xml_mz = my_peptide_lists.semi_tryptic_unique_real[i].xml_mz; //input   
-	//			my_peptide_lists.xic_st_results.back().pep_seq = my_peptide_lists.semi_tryptic_unique_real[i].pep_seq; //input 
-	//			my_peptide_lists.xic_st_results.back().miss_cleaves = my_peptide_lists.semi_tryptic_unique_real[i].miss_cleaves;
-	//			my_peptide_lists.xic_st_results.back().prot_seq = my_peptide_lists.semi_tryptic_unique_real[i].prot_seq;
-	//			my_peptide_lists.xic_st_results.back().proteotypic = my_peptide_lists.semi_tryptic_unique_real[i].proteotypic;
+	//			my_peptide_lists.xic_mc_results.push_back(dsPeptide());
+	//			my_peptide_lists.xic_mc_results.back().spec_sn = mySpec.getScanNumber(); //input
+	//			my_peptide_lists.xic_mc_results.back().spec_size = mySpec.size(); //input
+	//			my_peptide_lists.xic_mc_results.back().spec_mz = mySpec[ret].mz; //input
+	//			my_peptide_lists.xic_mc_results.back().xml_rtime = my_peptide_lists.miss_unique_real[i].xml_rtime / 60; // input
+	//			my_peptide_lists.xic_mc_results.back().spec_rt = mySpec.getRTime(); //input
+	//			my_peptide_lists.xic_mc_results.back().spec_intensity = mySpec[ret].intensity; //input;
+	//			my_peptide_lists.xic_mc_results.back().xml_mz = my_peptide_lists.miss_unique_real[i].xml_mz; //input   
+	//			my_peptide_lists.xic_mc_results.back().pep_seq = my_peptide_lists.miss_unique_real[i].pep_seq; //input 
+	//			my_peptide_lists.xic_mc_results.back().miss_cleaves = my_peptide_lists.miss_unique_real[i].miss_cleaves;
+	//			my_peptide_lists.xic_mc_results.back().prot_seq = my_peptide_lists.miss_unique_real[i].prot_seq;
+	//			my_peptide_lists.xic_mc_results.back().proteotypic = my_peptide_lists.miss_unique_real[i].proteotypic;
 	//		}
-
-	//		//MH: go to the next peptide
-	//		i++;
+	//		i++;//MH: go to the next peptide
 	//	}
-
 	//	myfile.readFile(NULL, mySpec);
 	//}
 
 
 
 
-	//cout << "pass 3 done" << "\n" << endl;
+	//cout << "pass 2 done" << "\n" << endl;
 
 
-	//if (my_peptide_lists.xic_st_results.size() > 0) {
 
-	//	sort(my_peptide_lists.xic_st_results.begin(), my_peptide_lists.xic_st_results.end(), compareSeqScan);
-	//	tmp.clear();
-	//	tmp.push_back(my_peptide_lists.xic_st_results[0]); //First entry is always novel
-	//	for (size_t i = 1; i < my_peptide_lists.xic_st_results.size(); i++) {
-	//		//skip duplicates
-	//		if ((my_peptide_lists.xic_st_results[i].pep_seq == my_peptide_lists.xic_st_results[i - 1].pep_seq) && (my_peptide_lists.xic_st_results[i].spec_sn == my_peptide_lists.xic_st_results[i - 1].spec_sn)) continue;
-	//		//keep novel entries
-	//		tmp.push_back(my_peptide_lists.xic_st_results[i]);
-	//	}
-	//	my_peptide_lists.xic_st_results = tmp; //copy the vector back
 
-	//	cout << my_peptide_lists.xic_st_results.size() << endl; 
-
+	////MH: Delete duplicates again.
+	//sort(my_peptide_lists.xic_mc_results.begin(), my_peptide_lists.xic_mc_results.end(), compareSeqScan);
+	//tmp.clear(); //clear our old tmp vector
+	//tmp.push_back(my_peptide_lists.xic_mc_results[0]);
+	//for (size_t i = 1; i < my_peptide_lists.xic_mc_results.size(); i++) {
+	//	if ((my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i - 1].pep_seq) && (my_peptide_lists.xic_mc_results[i].spec_sn == my_peptide_lists.xic_mc_results[i - 1].spec_sn)) continue;
+	//	tmp.push_back(my_peptide_lists.xic_mc_results[i]);
 	//}
+	//my_peptide_lists.xic_mc_results = tmp;
+
+
+
+
+	/*cout << my_peptide_lists.enzymatic_unique.size() << endl;*/ 
+	/*cout << my_peptide_lists.xic_mc_results.size() << endl;*/ 
+
 
 
 
 	return my_peptide_lists;
 
 }
+
+//peptide_lists scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& my_params) {
+//
+//	//READ MZML FILE FOR BOTH FULLY TRYPTIC AND MISCLEAVED PEPTIDES (MZML)
+//	MSReader myfile;
+//	Spectrum mySpec;
+//
+//	myfile.setFilter(MS1);
+//	myfile.readFile(my_params.mzml.c_str(), mySpec);
+//
+//
+//	//MH: We need to get through precursor peak extraction fast.
+//	//To do so, we need to do it a) using a single pass through all arrays, and
+//	//b) using fast lookups instead of full iteration.
+//	//Step 1 is to sort my_peptide_lists.dlist
+//	sort(my_peptide_lists.fully_tryp_unique_real.begin(), my_peptide_lists.fully_tryp_unique_real.end(), compareRTime);
+//	size_t pepIndex = 0; // we will start from the first sorted peptide
+//
+//
+//	int b = 0;
+//	int c = 0;
+//	while (mySpec.getRTime() != 0) {
+//
+//		//MH: Instead of iterating over all peptides, just iterate over the ones related to this spectrum
+//		//First we adjust our start point to the next peptide that falls within our RT window
+//		size_t i = pepIndex;
+//		while (i < my_peptide_lists.fully_tryp_unique_real.size() && (my_peptide_lists.fully_tryp_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
+//		if (i == my_peptide_lists.fully_tryp_unique_real.size()) break; //if we've checked every peptide, stop now.
+//		pepIndex = i; //mark our new start point for the next iteration
+//
+//		//MH: From here, iterate over all peptides until we reach the end of our RT window
+//		while (i < my_peptide_lists.fully_tryp_unique_real.size() && (my_peptide_lists.fully_tryp_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
+//
+//			//MH: Now we have to check for the peak itself in this spectrum.
+//			//Instead of iterating over the whole spectrum, just do a binary search to
+//			//rapidly find the position in the array.
+//			int ret = findPeakMZ(mySpec, my_peptide_lists.fully_tryp_unique_real[i].xml_mz, my_peptide_lists.fully_tryp_unique_real[i].tolerance);
+//			if (ret > -1) {
+//				my_peptide_lists.xic_ft_results.push_back(dsPeptide());
+//				my_peptide_lists.xic_ft_results.back().spec_sn = mySpec.getScanNumber(); //input
+//				my_peptide_lists.xic_ft_results.back().spec_size = mySpec.size(); //input
+//				my_peptide_lists.xic_ft_results.back().spec_mz = mySpec[ret].mz; //input
+//				my_peptide_lists.xic_ft_results.back().xml_rtime = my_peptide_lists.fully_tryp_unique_real[i].xml_rtime / 60; // input
+//				my_peptide_lists.xic_ft_results.back().spec_rt = mySpec.getRTime(); //input
+//				my_peptide_lists.xic_ft_results.back().spec_intensity = mySpec[ret].intensity; //input;
+//				my_peptide_lists.xic_ft_results.back().xml_mz = my_peptide_lists.fully_tryp_unique_real[i].xml_mz; //input   
+//				my_peptide_lists.xic_ft_results.back().pep_seq = my_peptide_lists.fully_tryp_unique_real[i].pep_seq; //input 
+//				my_peptide_lists.xic_ft_results.back().miss_cleaves = my_peptide_lists.fully_tryp_unique_real[i].miss_cleaves;
+//				my_peptide_lists.xic_ft_results.back().prot_seq = my_peptide_lists.fully_tryp_unique_real[i].prot_seq;
+//				my_peptide_lists.xic_ft_results.back().proteotypic = my_peptide_lists.fully_tryp_unique_real[i].proteotypic;
+//			}
+//
+//			//MH: go to the next peptide
+//			i++;
+//		}
+//
+//		myfile.readFile(NULL, mySpec);
+//	}
+//
+//
+//
+//
+//	cout << "pass 1 done" << "\n" << endl;
+//
+//
+//
+//
+//	sort(my_peptide_lists.xic_ft_results.begin(), my_peptide_lists.xic_ft_results.end(), compareSeqScan);
+//	vector<dsPeptide> tmp;
+//	tmp.push_back(my_peptide_lists.xic_ft_results[0]); //First entry is always novel
+//	for (size_t i = 1; i < my_peptide_lists.xic_ft_results.size(); i++) {
+//		//skip duplicates
+//		if ((my_peptide_lists.xic_ft_results[i].pep_seq == my_peptide_lists.xic_ft_results[i - 1].pep_seq) && (my_peptide_lists.xic_ft_results[i].spec_sn == my_peptide_lists.xic_ft_results[i - 1].spec_sn)) continue;
+//		//keep novel entries
+//		tmp.push_back(my_peptide_lists.xic_ft_results[i]);
+//	}
+//	my_peptide_lists.xic_ft_results = tmp; //copy the vector back
+//
+//
+//
+//
+//
+//	//MH: Now resort the list for d_pep
+//	sort(my_peptide_lists.miss_unique_real.begin(), my_peptide_lists.miss_unique_real.end(), compareRTime);
+//	pepIndex = 0; // reset our index	
+//
+//	//MH: Restart reading our mzML file. Note, this could all be done in one pass, instead of two.
+//	myfile.readFile(my_params.mzml.c_str(), mySpec);
+//	while (mySpec.getRTime() != 0) {
+//
+//		size_t i = pepIndex;
+//		while (i < my_peptide_lists.miss_unique_real.size() && (my_peptide_lists.miss_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() - my_params.run_time)) i++;
+//		if (i == my_peptide_lists.miss_unique_real.size()) break; //if we've checked every peptide, stop now.
+//		pepIndex = i; //mark our new start point for the next iteration
+//
+//		while (i < my_peptide_lists.miss_unique_real.size() && (my_peptide_lists.miss_unique_real[i].xml_rtime / 60) < (mySpec.getRTime() + my_params.run_time)) {
+//			int ret = findPeakMZ(mySpec, my_peptide_lists.miss_unique_real[i].xml_mz, my_peptide_lists.miss_unique_real[i].tolerance);
+//			if (ret > -1) {
+//				my_peptide_lists.xic_mc_results.push_back(dsPeptide());
+//				my_peptide_lists.xic_mc_results.back().spec_sn = mySpec.getScanNumber(); //input
+//				my_peptide_lists.xic_mc_results.back().spec_size = mySpec.size(); //input
+//				my_peptide_lists.xic_mc_results.back().spec_mz = mySpec[ret].mz; //input
+//				my_peptide_lists.xic_mc_results.back().xml_rtime = my_peptide_lists.miss_unique_real[i].xml_rtime / 60; // input
+//				my_peptide_lists.xic_mc_results.back().spec_rt = mySpec.getRTime(); //input
+//				my_peptide_lists.xic_mc_results.back().spec_intensity = mySpec[ret].intensity; //input;
+//				my_peptide_lists.xic_mc_results.back().xml_mz = my_peptide_lists.miss_unique_real[i].xml_mz; //input   
+//				my_peptide_lists.xic_mc_results.back().pep_seq = my_peptide_lists.miss_unique_real[i].pep_seq; //input 
+//				my_peptide_lists.xic_mc_results.back().miss_cleaves = my_peptide_lists.miss_unique_real[i].miss_cleaves;
+//				my_peptide_lists.xic_mc_results.back().prot_seq = my_peptide_lists.miss_unique_real[i].prot_seq;
+//				my_peptide_lists.xic_mc_results.back().proteotypic = my_peptide_lists.miss_unique_real[i].proteotypic;
+//			}
+//			i++;//MH: go to the next peptide
+//		}
+//		myfile.readFile(NULL, mySpec);
+//	}
+//
+//
+//
+//
+//	cout << "pass 2 done" << "\n" << endl;
+//
+//
+//
+//
+//	//MH: Delete duplicates again.
+//	sort(my_peptide_lists.xic_mc_results.begin(), my_peptide_lists.xic_mc_results.end(), compareSeqScan);
+//	tmp.clear(); //clear our old tmp vector
+//	tmp.push_back(my_peptide_lists.xic_mc_results[0]);
+//	for (size_t i = 1; i < my_peptide_lists.xic_mc_results.size(); i++) {
+//		if ((my_peptide_lists.xic_mc_results[i].pep_seq == my_peptide_lists.xic_mc_results[i - 1].pep_seq) && (my_peptide_lists.xic_mc_results[i].spec_sn == my_peptide_lists.xic_mc_results[i - 1].spec_sn)) continue;
+//		tmp.push_back(my_peptide_lists.xic_mc_results[i]);
+//	}
+//	my_peptide_lists.xic_mc_results = tmp;
+//
+//
+//
+//
+//	/*cout << my_peptide_lists.xic_ft_results.size() << endl;
+//	cout << my_peptide_lists.xic_mc_results.size() << endl; */
+//
+//
+//
+//
+//	return my_peptide_lists;
+//
+//}
 
 
 //match_lists scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& my_params) {

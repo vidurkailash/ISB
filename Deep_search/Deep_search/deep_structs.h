@@ -4,30 +4,51 @@
 #include <string>
 #include <vector>
 
-//MH: Simpler data structure for storing the precursor intensity array
 typedef struct dsXIC {
   float rTime;
   float intensity;
   float tot; 
 } dsXIC;
 
-//MH: New suggested data structure
-//I envision this to be an alternative to my_features;
+
+typedef struct dsPSM {
+    std::string pep_seq;
+    std::string prot_seq;
+    bool proteotypic = 0;
+    int charge;
+    float xml_rtime;
+    double pre_neutral_mass;
+    double calc_neutral_mass;
+    double xml_mz;
+    double probability;
+    int miss_cleaves; 
+    std::string prev_aa;     
+    std::string next_aa;   
+	bool enzymatic = 0; 
+	bool non_enzymatic = 0; 
+	bool semi_enzymatic = 0; 
+} dsPSM;
+
+
+
 typedef struct dsPeptide {
   std::string pep_seq;
   std::string prot_seq;
   bool proteotypic = 0;
+  bool enzymatic = 0;
+  bool non_enzymatic = 0;
+  bool semi_enzymatic = 0;
   int charge;
   float xml_rtime;
   double pre_neutral_mass;
   double calc_neutral_mass;
   double xml_mz;
-  double probability;
+  /*double probability;*/
   int miss_cleaves; //this variable has great dual functionality. If it is 0, then fully tryptic peptide. If >0, then it must be miscleaved.
   std::string prev_aa;     //for memory efficiency
   std::string next_aa;     //for memory efficiency
-  char cleave_loc;  //this might not be needed under new paradigm
-  int cleave_pos;   //this might not be needed under new paradigm
+  //char cleave_loc;  //this might not be needed under new paradigm
+  //int cleave_pos;   //this might not be needed under new paradigm
   int spec_sn;
   int spec_size;
   double spec_mz;
@@ -37,10 +58,10 @@ typedef struct dsPeptide {
   double areaXIC;
   double tolerance; 
   int index; 
+  int psm_count;
 } dsPeptide;
 
-//MH: New suggested data structure
-//for tracking pairs of peptides
+
 typedef struct dsPair {
   size_t trypIndex;
   size_t missIndex;
@@ -64,10 +85,6 @@ typedef struct dsProtein {
 	float percentMiss;
 	float total; 
 } dsProtein;
-
-
-
-
 
 
 
@@ -96,88 +113,6 @@ typedef struct parameters {
 //4. When decimal place precision isn't so important (i.e. retention time, peak intensity) then use float.
 //   Or if you are not sure, don't use float and just use double.
 
-
-
-
-//typedef struct features {
-//
-//	std::string pep_seq;
-//	int charge;
-//	float rtime;
-//	double mass; 
-//	double calc_mass; 
-//	double mz; 
-//	int miss_cleaves;
-//	std::string prev_aa;
-//	std::string next_aa;
-//
-//	std::string prot_seq;
-//	bool proteotypic = 0; 
-//
-//	std::string d_pep_seq;
-//	int d_pep_seq_charge;
-//	float d_pep_seq_rt;
-//	double d_pep_seq_mass;
-//	double d_pep_seq_mz; 
-//	int d_miss_cleaves;
-//	char cleave_loc;
-//	int cleave_pos; 
-//	
-//	
-//} my_features;
-
-
-
-//typedef struct intensities {
-//	float x;
-//	float y; 
-//	std::string seq;
-//	float tot;
-//	int mc;
-//
-//	std::string prot_seq;
-//	bool proteotypic;
-//
-//	float ft_inten; 
-//	float mc_inten; 
-//	float tot_inten; 
-//	float prot_frac; 
-//	int ft_tot;
-//	int mc_tot; 
-//
-//} my_intensities;
-
-
-//typedef struct compare {
-//	std::string miss_cleave_seq;
-//	std::string tryp_seq;
-//	float mc_tot;
-//	float tp_tot;
-//	int mc_mc;
-//	int tp_mc;
-//	int matches; 
-//	float zero_frac; 
-//	float ratio; 
-//
-//} my_compare;
-
-
-//typedef struct markers {
-//
-//	float spec_rt;
-//	int spec_sn;
-//	int spec_size; 
-//	double spec_mz; 
-//	float mzml_rt;
-//	double mzml_mz;
-//	float spec_intensity;
-//	std::string pep_seq; 
-//	int miss_cleaves; 
-//
-//	std::string prot_seq;
-//	bool proteotypic;
-//
-//} my_markers; 
 
 
 typedef struct metrics {

@@ -16,7 +16,7 @@ public:
 
 private: 
 	static bool compareProt(const dsPeptide& a, const dsPeptide& b) { return a.prot_seq < b.prot_seq; }
-
+	static bool compareTotal(const dsProtein& a, const dsProtein& b) { return a.total > b.total; }
 };
 
 
