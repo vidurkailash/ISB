@@ -14,9 +14,14 @@ typedef struct dsXIC {
 //MH: New suggested data structure
 //I envision this to be an alternative to my_features;
 typedef struct dsPeptide {
+	//Basic identifying sequence of each peptide
   std::string pep_seq;
   std::string prot_seq;
+	bool decoy;
   bool proteotypic = 0;
+	char prev_aa;     //for memory efficiency
+  char next_aa;     //for memory efficiency
+
   int charge;
   float xml_rtime;
   double pre_neutral_mass;
@@ -24,19 +29,18 @@ typedef struct dsPeptide {
   double xml_mz;
   double probability;
   int miss_cleaves; //this variable has great dual functionality. If it is 0, then fully tryptic peptide. If >0, then it must be miscleaved.
-  std::string prev_aa;     //for memory efficiency
-  std::string next_aa;     //for memory efficiency
-  char cleave_loc;  //this might not be needed under new paradigm
-  int cleave_pos;   //this might not be needed under new paradigm
-  int spec_sn;
-  int spec_size;
-  double spec_mz;
-  float spec_rt;
-  float spec_intensity;
+  
+  //char cleave_loc;  //this might not be needed under new paradigm
+  //int cleave_pos;   //this might not be needed under new paradigm
+  //int spec_sn;
+  //int spec_size;
+  //double spec_mz;
+  //float spec_rt;
+  //float spec_intensity;
   std::vector<dsXIC> XIC;  //stands for eXtracted Ion Chromatogram
   double areaXIC;
-  double tolerance; 
-  int index; 
+  //double tolerance; 
+  //int index; 
 } dsPeptide;
 
 //MH: New suggested data structure
@@ -54,11 +58,20 @@ typedef struct dsPair {
 
 typedef struct dsProtein {
 	std::string prot_seq;
-	std::vector<std::string> trypPeptides; //references to peptides counted as tryptic
-	std::vector<std::string> missPeptides; //references to peptides counted as missed cleaved
-	float sumTryp;
-	float sumMiss;
-	float percentMiss;
+
+	//MH: These two vectors have been changed to index references to access ALL peptide data.
+	std::vector<size_t> trypPeptides; //references to peptides counted as tryptic
+	std::vector<size_t> missPeptides; //references to peptides counted as missed cleaved
+
+	std::vector<size_t> peptides;
+	float sumMC;
+	float sumNS;
+	float sumE;
+	int nonZeroPeps;
+	int sumPSM;
+
+
+	//float percentMiss;
 	float total; 
 } dsProtein;
 
