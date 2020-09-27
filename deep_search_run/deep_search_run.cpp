@@ -15,98 +15,83 @@
 #include <cstdio>
 #include <numeric>
 
+#define ds_version "0.9"
+#define ds_builddate "September 25 2020"
+
 
 using namespace std;
 
 my_parameters cmd_input(int argc, char* argv[]);
-void warnings(my_parameters& my_params);
 void info_description(); 
+void marquee();
 
 my_parameters cmd_input(int argc, char* argv[]) {
 
 	my_parameters my_params;
 	
-	double input_prob = 10;
-	my_params.filename = "q";
-	my_params.mzml = "spec";
-	my_params.run_time = 2;
+	my_params.probability = 0.9;
+	my_params.filename = argv[1];
+	my_params.mzml = argv[2];
+	my_params.ret_time = 2;
 	my_params.ppm = 10;
-	my_params.cleave_loc = "KR-";
+	my_params.cleave_loc = "KR";
 	my_params.hyphen = "-";
 	my_params.anti_cleave_loc = "P";
-	my_params.ident = 'b';
+	my_params.iprophet = false;
 
-	for (int i = 1; i < argc; i++) {
+	for (int i = 3; i < argc; i++) {
 		if (string(argv[i]) == "--threshold" || string(argv[i]) == "-t") {
-			if (i + 1 < argc) {
-				input_prob = atof(argv[++i]);
-			}
+			if (i + 1 < argc) my_params.probability = atof(argv[++i]);
 			else {
+				cout << "Invalid threshold" << endl;
+				info_description();
+				exit(10);
 			}
 		}
 		else if (string(argv[i]) == "--iprophet" || string(argv[i]) == "-i") {
-			my_params.ident = 'a';
-		}
-		else if (string(argv[i]) == "--filename" || string(argv[i]) == "-f") {
-			if (i + 1 < argc) {
-				my_params.filename = string(argv[++i]);
-			}
-			else {
-				/*cout << "xml filename entered is invalid" << endl;
-				exit(1);*/
-				// call warning function 
-			}
-		}
-		else if (string(argv[i]) == "--mzml" || string(argv[i]) == "-m") {
-			if (i + 1 < argc) {
-				my_params.mzml = string(argv[++i]);
-			}
-			else {
-				/*cout << "mzml filename entered is invalid" << endl;
-				exit(1);*/
-				// call warning function 
-			}
+			my_params.iprophet = true;
 		}
 		else if (string(argv[i]) == "--rtime" || string(argv[i]) == "-r") {
-			if (i + 1 < argc) {
-				my_params.run_time = (float)atof(argv[++i]);
+			if (i + 1 < argc) my_params.ret_time = (float)atof(argv[++i]);
+			else {
+				cout << "Invalid rtime" << endl;
+				info_description();
+				exit(10);
 			}
 		}
 		else if (string(argv[i]) == "--ppm" || string(argv[i]) == "-p") {
-			if (i + 1 < argc) {
-				my_params.ppm = (float)atof(argv[++i]);
+			if (i + 1 < argc) my_params.ppm = (float)atof(argv[++i]);
+			else {
+				cout << "Invalid ppm" << endl;
+				info_description();
+				exit(10);
 			}
 		}
 		else if (string(argv[i]) == "--loc" || string(argv[i]) == "-c") {
-			if (i + 1 < argc) {
-				my_params.cleave_loc = string(argv[++i]);
+			if (i + 1 < argc) my_params.cleave_loc = string(argv[++i]);
+			else {
+				cout << "Invalid loc" << endl;
+				info_description();
+				exit(10);
 			}
 		}
 		else if (string(argv[i]) == "--anti" || string(argv[i]) == "-a") {
-			if (i + 1 < argc) {
-				my_params.anti_cleave_loc = string(argv[++i]);
+			if (i + 1 < argc) my_params.anti_cleave_loc = string(argv[++i]);
+			else {
+				cout << "Invalid anti" << endl;
+				info_description();
+				exit(10);
 			}
+		}
+		else {
+			cout << "Invalid parameter" << endl;
+			info_description();
+			exit(10);
 		}
 	}
 
-	//MAKES SURE THESE PARAMETERS ARE ENTERED AND ARE VALID
-	if (input_prob == 10) {
-		info_description();
-	}
-	if (my_params.filename == "q") {
-		info_description();
-	}
-	if (my_params.mzml == "spec") {
-		info_description();
-	}
-
-
-	//INPUT PARAMETERS IN DATA STRUCTURE
-  //MH: no longer need for user intervention.
-	if (my_params.ident == 'a') my_params.ipro_prob = input_prob;
-	else my_params.pep_prob = input_prob;
-
-
+	//This is poor design and needs to be fixed in the future.
+	my_params.cleave_loc += "-";
 	return my_params;
 
 }
@@ -115,196 +100,128 @@ my_parameters cmd_input(int argc, char* argv[]) {
 
 
 void info_description() {
-	
-	cout << "QUICK TUTORIAL" << "\n" << endl; 
-	cout << "Example:" << endl; 
-	cout << ">deep_search_run.exe -f <file.pep.xml> -t <0-1> -m <file.mzml> [-i -r <float> -p <float> -c <string> -a <string> ]" << "\n" << endl;
-	cout << "The three mandatory parameters are the xml file(-f), the threshold value(-t), and the corresponding mzml file(-m)." << endl; 
-	cout << "The optional parameters include the iprophet tag(-i), rtime search window(-r), ppm threshold(-p), cleave sites (-c), and their exceptions (-a). If not specified, the defaults are peptide prophet search, 2 min, 10 ppm, K/R, and P." << "\n" << endl;  
-	cout << "Some common errors: parameter tags are not correct, xml file and mzml file do not correspond with each other, threshold value, rtime value, and/or ppm value out of bounds." << "\n" << endl; 
-	cout << "Consult documentation for further clarification." << endl; 
-
-	exit(1); 
-
+	cout << "USAGE: deep_search_run <pepXML> <mzML> [OPTIONS]" << endl;
+	cout << "OPTIONS:" << endl;
+	cout << "  -t, --threshold <number>  =  probability threshold. Default = 0.9" << endl;
+	cout << "  -i, --iprophet            =  use iProbability instead of probability for threshold." << endl;
+	cout << "  -r, --rtime <number>      =  +/- retention time (in minutes) to use for precursor ion extraction. Default = 2.0" << endl;
+	cout << "  -p, --ppm <number>        =  +/- mass error (in parts-per-million) to use for precursor ion extraction. Default = 10.0" << endl;
+	cout << "  -c, --loc <string>        =  amino acids where enzymatic cleavage occurs, c-terminal only. Default = KR" << endl;
+	cout << "  -a, --anti <string>       =  amino acids where enzymatic cleavage rules are ignored, c-terminal only. Default = P" << endl;
 }
 
-
-void warnings(my_parameters& my_params) {
-
-	switch (my_params.ident) {
-	case 'a':
-		if (my_params.ipro_prob < 0 || my_params.ipro_prob > 1) {
-			cout << "Error: threshold iprophet probability value invalid. Consult documentation." << endl;
-			info_description();
-		}
-		if (my_params.ipro_prob < 0.9) {
-			char ans;
-			cout << "Are you sure you want this probability?: (Y/N)" << endl;
-			cin >> ans;
-			if (ans == 'N') {
-				cout << "Please re enter valid probability" << endl;
-				exit(1);
-			}
-		}
-		break;
-	case 'b':
-		if (my_params.pep_prob < 0 || my_params.pep_prob > 1) {
-			cout << "Error: threshold peptide probability value invalid. Consult documentation." << endl;
-			info_description();
-		}
-		if (my_params.pep_prob < 0.9) {
-			char ans;
-			cout << "Are you sure you want this probability?: (Y/N)" << endl;
-			cin >> ans;
-			if (ans == 'N') {
-				cout << "Please re enter valid probability" << endl;
-				exit(1);
-			}
-		}
-		break;
-	default:
-		cout << "please enter a probability" << endl;
-		break;
-	}
-
-  cout << "Parameters good." << endl;
-
+void marquee(){
+	cout << "DEEPsearch, copyright Vidur Kailash, Institute for Systems Biology" << endl;
+	cout << "Version: " << ds_version << endl;
+	cout << "Build Date: " << ds_builddate << endl;
+	cout << endl;
 }
-
-
 
 
 int main(int argc, char* argv[])
 {
 
-	deep_functions my_deep_functions;
+	marquee();  //Announce the application to the user
+	if(argc<2) {
+		info_description();
+		return 2;
+	}
+
+	//deep_functions my_deep_functions;
 	scan_reader sr;
-	protein_reader pr; 
+	//protein_reader pr; 
 
 	my_parameters my_params;
 	my_params = cmd_input(argc, argv);
-	warnings(my_params);
 
 	peptide_lists my_peptide_lists; 
 	
 	metrics my_metrics;
-
-
-	//for (int i = 0; i < tmp.size(); i++) {
-	//	size_t found = my_params.cleave_loc.find(tmp[i][0]);
-	//	size_t found1 = my_params.cleave_loc.find(tmp[i].back());
-	//	/*size_t found2 = my_params.hyphen.find(my_peptide_lists.semi_tryptic_real[i].next_aa);*/
-	//	if (found != string::npos && (found1 != string::npos /*|| found2 != string::npos*/)) {
-	//		if (i == 0) {
-	//			tmp.erase(tmp.begin() + i);
-	//			i = 0;
-	//		}
-	//		if (i != 0) {
-	//			tmp.erase(tmp.begin() + i);
-	//			i = i - 1;
-	//		}
-	//	}
-
-	//}
 
 	cout << "XML File: " << my_params.filename << endl; 
 	cout << "MZML File: " << my_params.mzml << endl; 
 
 
   //Parse the pepXML file and return a list of PSMs
-  my_peptide_lists = my_deep_functions.xml_parse(my_params);
-	cout << "XML parsed, " << my_peptide_lists.all_psm.size() << " of " << my_peptide_lists.total << " PSMs above probability threshold." << endl; 
+  my_peptide_lists.xml_parse(my_params);
+	cout << "XML parsed, "  << my_peptide_lists.total_psms_in_xml << " total PSMs parsed." << endl; 
 
-	int c = 0;
-	int d = 0;
-  //Count the tryptic and non-tryptic PSMs
-	if(my_deep_functions.enzymatic_calc(my_peptide_lists, my_params)){
-		
-		for (int i = 0; i < my_peptide_lists.all_psm.size(); i++) {
-			if (my_peptide_lists.all_psm[i].enzymatic == 1) c++;
-			if (my_peptide_lists.all_psm[i].non_enzymatic == 1) d++; 
-		}
-  } else {
-    //Right now, the function can never return false
-  }
-	int e = 0;
-	if(my_deep_functions.semi_enzymatic_calc(my_peptide_lists, my_params)){
-		 
-		for (int i = 0; i < my_peptide_lists.all_psm.size(); i++) {
-			if (my_peptide_lists.all_psm[i].semi_enzymatic == 1) e++;
-		}
-	}
-	else {}
-	cout << c << " enzymatic PSMs, " << d << " non-enzymatic PSMs, and " << e << " semi-enzymatic PSMs" << endl;
+  //Tally the types of PSMs
+	my_peptide_lists.miss_cleave(my_params);
+	my_peptide_lists.enzymatic_calc(my_params);
 
-	/*for (int i = 0; i < my_peptide_lists.all_psm.size(); i++) {
-		if (my_peptide_lists.all_psm[i].non_enzymatic == 1) {
-			cout << my_peptide_lists.all_psm[i].prev_aa << "  " << my_peptide_lists.all_psm[i].pep_seq << "  " << my_peptide_lists.all_psm[i].next_aa << endl; 
-		}
-	}*/
-
-  //Count the miscleaved PSMs
-  if(my_deep_functions.miss_cleave(my_peptide_lists, my_params)){
-    int mc=0;
-    for(size_t i = 0; i<my_peptide_lists.all_psm.size(); i++){
-      if(my_peptide_lists.all_psm[i].enzymatic == 1 && my_peptide_lists.all_psm[i].miss_cleaves > 0) mc++;
-    }
-    cout << mc << " of " << c << " enzymatic PSMs are miscleaved." << endl;
-	mc = 0; 
+	my_metrics.psm_total=(int)my_peptide_lists.all_psm.size();
+	my_metrics.psm_enzymatic=0;
+	my_metrics.psm_miscleave=0;
+	my_metrics.psm_nonspecific=0;
 	for (size_t i = 0; i < my_peptide_lists.all_psm.size(); i++) {
-		if (my_peptide_lists.all_psm[i].semi_enzymatic == 1 && my_peptide_lists.all_psm[i].miss_cleaves > 0) mc++;
+		if (my_peptide_lists.all_psm[i].non_enzymatic) my_metrics.psm_nonspecific++;
+		if (my_peptide_lists.all_psm[i].miss_cleaves>0) my_metrics.psm_miscleave++;
+		if(my_peptide_lists.all_psm[i].miss_cleaves==0 && !my_peptide_lists.all_psm[i].non_enzymatic) my_metrics.psm_enzymatic++;
 	}
-	cout << mc << " of " << e << " semi-enzymatic PSMs are miscleaved." << endl;
-  } else {
-    //Right now, the function can never return false
-  }
-
+	cout << my_metrics.psm_total << " total PSMs above probability threshold." << endl;
+	cout << "  " << my_metrics.psm_enzymatic << " (" << (double)my_metrics.psm_enzymatic/ my_metrics.psm_total*100 << "%) are enzymatic PSMs." << endl;
+	cout << "  " << my_metrics.psm_miscleave << " (" << (double)my_metrics.psm_miscleave / my_metrics.psm_total * 100 << "%) are mis-cleaved PSMs." << endl;
+  cout << "  " << my_metrics.psm_nonspecific << " (" << (double)my_metrics.psm_nonspecific / my_metrics.psm_total * 100 << "%) are nonspecific PSMs." << endl;
  
-
-  int f = 0; 
-	if(my_deep_functions.delete_dup(my_peptide_lists)){
-    /*cout << my_peptide_lists.tryp_unique_z_real.size() << " unique tryptic PSMs." << endl;
-	cout << my_peptide_lists.semi_tryptic_unique_z_real.size() << " unique semi-tryptic PSMs." << endl; */
-    cout << my_peptide_lists.enzymatic_unique.size() << " are unique enzymatic peptides." << endl;
-	for (int i = 0; i < my_peptide_lists.enzymatic_unique.size(); i++) {
-		if (my_peptide_lists.enzymatic_unique[i].miss_cleaves > 0) f++; 
-	}
-    cout << "and " << f << " of those have miscleavages." << endl;
-	/*cout << my_peptide_lists.semi_tryptic_unique_real.size() << " are unique semi-tryptic peptides." << endl;*/
-	} 
-
-	else {
+	if(my_peptide_lists.delete_dup()){
+		my_metrics.psm_unique=(int)my_peptide_lists.all_psm.size();
+		cout << "\n" << my_metrics.psm_unique << " precursor ions represent the PSMs." << endl;
+	} else {
     //Right now, the function can never return false
 	}
 
-
-
- //MH: This function iterates over all peptides to determine pairs of tryptic and miscleaved to target.
-	if(my_deep_functions.lcd(my_peptide_lists, my_params)){
-		cout << "\n" << "m/z calculated for both lists" << "\n" << endl; 
+	cout << "Extracting precursor ion signals from mzML file..." << endl;
+	if(!sr.mzml(my_peptide_lists, my_params)){
+		cout << " Error reading mzML file. Exiting." << endl;
+		return -1;
 	} else {
-    //MH: Right now, the function can never return false
+		cout << " Done!" << endl;
 	}
-
-  
-
-	my_peptide_lists = sr.mzml(my_peptide_lists, my_params);
-	cout << "mzml file cross checked... next step " << "\n" << endl;
 
 	
-	if(my_deep_functions.reader(my_peptide_lists, my_metrics)){} 
-	else {
+	if(my_peptide_lists.reader()){
+		my_metrics.pep_count=(int)my_peptide_lists.all_peptides.size();
+		my_metrics.pep_total=0;
+		my_metrics.pep_enzymatic=0;
+		my_metrics.pep_miscleave=0;
+		my_metrics.pep_nonspecific=0;
+		for(size_t i=0;i<my_peptide_lists.all_peptides.size();i++){
+			my_metrics.pep_total+=my_peptide_lists.all_peptides[i].areaXIC;
+			if(my_peptide_lists.all_peptides[i].miss_cleaves>0) my_metrics.pep_miscleave += my_peptide_lists.all_peptides[i].areaXIC;
+			if (my_peptide_lists.all_peptides[i].non_enzymatic) my_metrics.pep_nonspecific += my_peptide_lists.all_peptides[i].areaXIC;
+			if (my_peptide_lists.all_peptides[i].miss_cleaves == 0 && !my_peptide_lists.all_peptides[i].non_enzymatic) my_metrics.pep_enzymatic += my_peptide_lists.all_peptides[i].areaXIC;
+		}
+		cout << "\n" << my_metrics.pep_count << " total peptides quantified." << endl;
+		cout << "  " << my_metrics.pep_enzymatic/ my_metrics.pep_total*100 << "% of peptide signal is enzymatic." << endl;
+		cout << "  " << my_metrics.pep_miscleave / my_metrics.pep_total * 100 << "% of peptide signal is mis-cleaved." << endl;
+		cout << "  " << my_metrics.pep_nonspecific / my_metrics.pep_total * 100 << "% of peptide signal is nonspecific." << endl;
+	}	else {
       //MH: Right now, the function can never return false
 	}
 
 
-	
-	cout << "computing protein level stats" << endl; 
-	if(pr.prot_stats(my_peptide_lists)){
+	if(my_peptide_lists.prot_stats()){
+		my_metrics.prot_count=(int)my_peptide_lists.all_proteins.size();
+		my_metrics.prot_avg_enzymatic=0;
+		my_metrics.prot_avg_miscleave=0;
+		my_metrics.prot_avg_nonspecific=0;
+		for (size_t i = 0;i<my_peptide_lists.all_proteins.size();i++){
+			my_metrics.prot_avg_enzymatic += (my_peptide_lists.all_proteins[i].sumEnz/ my_peptide_lists.all_proteins[i].total*100);
+			my_metrics.prot_avg_miscleave += (my_peptide_lists.all_proteins[i].sumMiss / my_peptide_lists.all_proteins[i].total * 100);
+			my_metrics.prot_avg_nonspecific += (my_peptide_lists.all_proteins[i].sumNonSp / my_peptide_lists.all_proteins[i].total * 100);
+		}
+		my_metrics.prot_avg_enzymatic /= my_metrics.prot_count;
+		my_metrics.prot_avg_miscleave /= my_metrics.prot_count;
+		my_metrics.prot_avg_nonspecific /= my_metrics.prot_count;
+		cout << "\n" << my_metrics.prot_count << " total proteins represented by one or more proteotypic peptides." << endl;
+		cout << "  " << my_metrics.prot_avg_enzymatic << "% average enzymatic percentage among proteins." << endl;
+		cout << "  " << my_metrics.prot_avg_miscleave << "% average mis-cleavage percentage among proteins." << endl;
+		cout << "  " << my_metrics.prot_avg_nonspecific << "% average nonspecific percentage among proteins." << endl;
 		string of;
 		of=my_params.filename;
 		of+=".json";
-		my_deep_functions.json(my_peptide_lists,of); //MH: I had to move this up here because there are horrid memory leaks that occur otherwise.
+		my_peptide_lists.json(of); //MH: I had to move this up here because there are horrid memory leaks that occur otherwise.
 	}
 	else{}
 
