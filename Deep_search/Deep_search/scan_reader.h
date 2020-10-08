@@ -2,7 +2,7 @@
 #define scan_reader_class_h
 
 #include "deep_class.h"
-#include "MSReader.h"
+#include "mzparser.h"
 
 #include <numeric>
 
@@ -13,7 +13,7 @@ public:
 private:
 
   //MH: Binary search function. Could and should be overloaded for PPM instead of MZ tolerance
-  int findPeakMZ(MSToolkit::Spectrum& spec, double mz, double tol);
+  int findPeakMZ(mzParser::BasicSpectrum& spec, double mz, double tol);
 
   //MH: quick helper function for sorting from lowest to highes RT
   static bool compareRTime(const dsPSM& a, const dsPSM& b) { return a.xml_rtime < b.xml_rtime; }
