@@ -16,14 +16,14 @@
 #include <numeric>
 
 #define ds_version "0.9"
-#define ds_builddate "September 25 2020"
+#define ds_builddate "October 7 2020"
 
 
 using namespace std;
 
 my_parameters cmd_input(int argc, char* argv[]);
 void info_description(); 
-void marquee();
+string marquee();
 
 my_parameters cmd_input(int argc, char* argv[]) {
 
@@ -90,13 +90,9 @@ my_parameters cmd_input(int argc, char* argv[]) {
 		}
 	}
 
-	//This is poor design and needs to be fixed in the future.
-	my_params.cleave_loc += "-";
 	return my_params;
 
 }
-
-
 
 
 void info_description() {
@@ -110,18 +106,22 @@ void info_description() {
 	cout << "  -a, --anti <string>       =  amino acids where enzymatic cleavage rules are ignored, c-terminal only. Default = P" << endl;
 }
 
-void marquee(){
-	cout << "DEEPsearch, copyright Vidur Kailash, Institute for Systems Biology" << endl;
-	cout << "Version: " << ds_version << endl;
-	cout << "Build Date: " << ds_builddate << endl;
-	cout << endl;
+string marquee(){
+	string s="DEEPsearch, copyright Vidur Kailash, Institute for Systems Biology\n";
+	s+="Version: ";
+	s+=ds_version;
+	s+= "\n";
+	s+="Build Date: ";
+	s+=ds_builddate;
+	s+="\n";
+	return s;
 }
 
 
 int main(int argc, char* argv[])
 {
-
-	marquee();  //Announce the application to the user
+	string m=marquee();
+	cout << m << endl;  //Announce the application to the user
 	if(argc<2) {
 		info_description();
 		return 2;
@@ -145,6 +145,7 @@ int main(int argc, char* argv[])
   //Parse the pepXML file and return a list of PSMs
   my_peptide_lists.xml_parse(my_params);
 	cout << "XML parsed, "  << my_peptide_lists.total_psms_in_xml << " total PSMs parsed." << endl; 
+	my_metrics.psm_xml = my_peptide_lists.total_psms_in_xml;
 
   //Tally the types of PSMs
 	my_peptide_lists.miss_cleave(my_params);
@@ -159,14 +160,15 @@ int main(int argc, char* argv[])
 		if (my_peptide_lists.all_psm[i].miss_cleaves>0) my_metrics.psm_miscleave++;
 		if(my_peptide_lists.all_psm[i].miss_cleaves==0 && !my_peptide_lists.all_psm[i].non_enzymatic) my_metrics.psm_enzymatic++;
 	}
-	cout << my_metrics.psm_total << " total PSMs above probability threshold." << endl;
-	cout << "  " << my_metrics.psm_enzymatic << " (" << (double)my_metrics.psm_enzymatic/ my_metrics.psm_total*100 << "%) are enzymatic PSMs." << endl;
-	cout << "  " << my_metrics.psm_miscleave << " (" << (double)my_metrics.psm_miscleave / my_metrics.psm_total * 100 << "%) are mis-cleaved PSMs." << endl;
-  cout << "  " << my_metrics.psm_nonspecific << " (" << (double)my_metrics.psm_nonspecific / my_metrics.psm_total * 100 << "%) are nonspecific PSMs." << endl;
+	//cout << my_metrics.psm_total << " total PSMs above probability threshold." << endl;
+	//cout << "  " << my_metrics.psm_enzymatic << " (" << (double)my_metrics.psm_enzymatic/ my_metrics.psm_total*100 << "%) are enzymatic PSMs." << endl;
+	//cout << "  " << my_metrics.psm_miscleave << " (" << (double)my_metrics.psm_miscleave / my_metrics.psm_total * 100 << "%) are mis-cleaved PSMs." << endl;
+  //cout << "  " << my_metrics.psm_nonspecific << " (" << (double)my_metrics.psm_nonspecific / my_metrics.psm_total * 100 << "%) are nonspecific PSMs." << endl;
  
 	if(my_peptide_lists.delete_dup()){
 		my_metrics.psm_unique=(int)my_peptide_lists.all_psm.size();
-		cout << "\n" << my_metrics.psm_unique << " precursor ions represent the PSMs." << endl;
+		//cout << "\n" << my_metrics.psm_unique << " precursor ions represent the PSMs." << endl;
+		cout << "PSM analysis complete." << endl;
 	} else {
     //Right now, the function can never return false
 	}
@@ -181,21 +183,24 @@ int main(int argc, char* argv[])
 
 	
 	if(my_peptide_lists.reader()){
-		my_metrics.pep_count=(int)my_peptide_lists.all_peptides.size();
+		my_metrics.pep_unique=(int)my_peptide_lists.all_peptides.size();
+		my_metrics.pep_count=0;
 		my_metrics.pep_total=0;
 		my_metrics.pep_enzymatic=0;
 		my_metrics.pep_miscleave=0;
 		my_metrics.pep_nonspecific=0;
 		for(size_t i=0;i<my_peptide_lists.all_peptides.size();i++){
 			my_metrics.pep_total+=my_peptide_lists.all_peptides[i].areaXIC;
+			if(my_peptide_lists.all_peptides[i].areaXIC>0) my_metrics.pep_count++;
 			if(my_peptide_lists.all_peptides[i].miss_cleaves>0) my_metrics.pep_miscleave += my_peptide_lists.all_peptides[i].areaXIC;
 			if (my_peptide_lists.all_peptides[i].non_enzymatic) my_metrics.pep_nonspecific += my_peptide_lists.all_peptides[i].areaXIC;
 			if (my_peptide_lists.all_peptides[i].miss_cleaves == 0 && !my_peptide_lists.all_peptides[i].non_enzymatic) my_metrics.pep_enzymatic += my_peptide_lists.all_peptides[i].areaXIC;
 		}
-		cout << "\n" << my_metrics.pep_count << " total peptides quantified." << endl;
-		cout << "  " << my_metrics.pep_enzymatic/ my_metrics.pep_total*100 << "% of peptide signal is enzymatic." << endl;
-		cout << "  " << my_metrics.pep_miscleave / my_metrics.pep_total * 100 << "% of peptide signal is mis-cleaved." << endl;
-		cout << "  " << my_metrics.pep_nonspecific / my_metrics.pep_total * 100 << "% of peptide signal is nonspecific." << endl;
+		//cout << "\n" << my_metrics.pep_count << " total peptides quantified." << endl;
+		//cout << "  " << my_metrics.pep_enzymatic/ my_metrics.pep_total*100 << "% of peptide signal is enzymatic." << endl;
+		//cout << "  " << my_metrics.pep_miscleave / my_metrics.pep_total * 100 << "% of peptide signal is mis-cleaved." << endl;
+		//cout << "  " << my_metrics.pep_nonspecific / my_metrics.pep_total * 100 << "% of peptide signal is nonspecific." << endl;
+		cout << "Peptide analysis complete." << endl;
 	}	else {
       //MH: Right now, the function can never return false
 	}
@@ -214,10 +219,12 @@ int main(int argc, char* argv[])
 		my_metrics.prot_avg_enzymatic /= my_metrics.prot_count;
 		my_metrics.prot_avg_miscleave /= my_metrics.prot_count;
 		my_metrics.prot_avg_nonspecific /= my_metrics.prot_count;
-		cout << "\n" << my_metrics.prot_count << " total proteins represented by one or more proteotypic peptides." << endl;
-		cout << "  " << my_metrics.prot_avg_enzymatic << "% average enzymatic percentage among proteins." << endl;
-		cout << "  " << my_metrics.prot_avg_miscleave << "% average mis-cleavage percentage among proteins." << endl;
-		cout << "  " << my_metrics.prot_avg_nonspecific << "% average nonspecific percentage among proteins." << endl;
+		//cout << "\n" << my_metrics.prot_count << " total proteins represented by one or more proteotypic peptides." << endl;
+		//cout << "  " << my_metrics.prot_avg_enzymatic << "% average enzymatic percentage among proteins." << endl;
+		//cout << "  " << my_metrics.prot_avg_miscleave << "% average mis-cleavage percentage among proteins." << endl;
+		//cout << "  " << my_metrics.prot_avg_nonspecific << "% average nonspecific percentage among proteins." << endl;
+		cout << "Protein analysis complete." << endl;
+
 		string of;
 		of=my_params.filename;
 		of+=".json";
@@ -226,24 +233,11 @@ int main(int argc, char* argv[])
 	else{}
 
 
-	//cout << "almost there... calculating metrics... results will be printed shortly" << "\n" << endl;
-
-	//my_metrics = my_deep_functions.calc(my_peptide_lists, my_metrics);
-	//my_metrics = my_deep_functions.calc1(my_peptide_lists, my_metrics, my_params);
-	//	
-	//my_deep_functions.print(my_peptide_lists, my_metrics); 
+	//Export report
+	cout << "\nReport:\n" << endl;
+	my_peptide_lists.calc(my_metrics);
+	my_peptide_lists.print(my_metrics,my_params,m);
 	
 	return 0;
 
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
