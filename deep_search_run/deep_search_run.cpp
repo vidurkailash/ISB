@@ -31,28 +31,27 @@ my_parameters cmd_input(int argc, char* argv[]) {
 	
 	my_params.probability = 0.9;
 	my_params.filename = argv[1];
-	my_params.mzml = argv[2];
 	my_params.ret_time = 2;
 	my_params.ppm = 10;
 	my_params.cleave_loc = "KR";
 	my_params.hyphen = "-";
-	my_params.anti_cleave_loc = "P";
-	my_params.iprophet = false;
+	my_params.anti_cleave_loc = "";
+	my_params.enzymeSense = false;
 
-	for (int i = 3; i < argc; i++) {
+	for (int i = 2; i < argc; i++) {
 		if (string(argv[i]) == "--threshold" || string(argv[i]) == "-t") {
-			if (i + 1 < argc) my_params.probability = atof(argv[++i]);
+			if (i + 1 < argc && argv[i+1][0]!='-') my_params.probability = atof(argv[++i]);
 			else {
 				cout << "Invalid threshold" << endl;
 				info_description();
 				exit(10);
 			}
 		}
-		else if (string(argv[i]) == "--iprophet" || string(argv[i]) == "-i") {
-			my_params.iprophet = true;
+    else if (string(argv[i]) == "--enzymeN" || string(argv[i]) == "-n") {
+			my_params.enzymeSense=true;
 		}
 		else if (string(argv[i]) == "--rtime" || string(argv[i]) == "-r") {
-			if (i + 1 < argc) my_params.ret_time = (float)atof(argv[++i]);
+			if (i + 1 < argc && argv[i+1][0]!='-') my_params.ret_time = (float)atof(argv[++i]);
 			else {
 				cout << "Invalid rtime" << endl;
 				info_description();
@@ -60,7 +59,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 			}
 		}
 		else if (string(argv[i]) == "--ppm" || string(argv[i]) == "-p") {
-			if (i + 1 < argc) my_params.ppm = (float)atof(argv[++i]);
+			if (i + 1 < argc && argv[i+1][0]!='-') my_params.ppm = (float)atof(argv[++i]);
 			else {
 				cout << "Invalid ppm" << endl;
 				info_description();
@@ -68,7 +67,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 			}
 		}
 		else if (string(argv[i]) == "--loc" || string(argv[i]) == "-c") {
-			if (i + 1 < argc) my_params.cleave_loc = string(argv[++i]);
+			if (i + 1 < argc && argv[i+1][0]!='-') my_params.cleave_loc = string(argv[++i]);
 			else {
 				cout << "Invalid loc" << endl;
 				info_description();
@@ -76,7 +75,7 @@ my_parameters cmd_input(int argc, char* argv[]) {
 			}
 		}
 		else if (string(argv[i]) == "--anti" || string(argv[i]) == "-a") {
-			if (i + 1 < argc) my_params.anti_cleave_loc = string(argv[++i]);
+			if (i + 1 < argc && argv[i+1][0]!='-') my_params.anti_cleave_loc = string(argv[++i]);
 			else {
 				cout << "Invalid anti" << endl;
 				info_description();
@@ -96,14 +95,15 @@ my_parameters cmd_input(int argc, char* argv[]) {
 
 
 void info_description() {
-	cout << "USAGE: deep_search_run <pepXML> <mzML> [OPTIONS]" << endl;
+  cout << "APPLICATION NOTE: PepXML should contain results from a single mzML search." << endl;
+	cout << "USAGE: deep_search_run <pepXML> [OPTIONS]" << endl;
 	cout << "OPTIONS:" << endl;
 	cout << "  -t, --threshold <number>  =  probability threshold. Default = 0.9" << endl;
-	cout << "  -i, --iprophet            =  use iProbability instead of probability for threshold." << endl;
 	cout << "  -r, --rtime <number>      =  +/- retention time (in minutes) to use for precursor ion extraction. Default = 2.0" << endl;
 	cout << "  -p, --ppm <number>        =  +/- mass error (in parts-per-million) to use for precursor ion extraction. Default = 10.0" << endl;
-	cout << "  -c, --loc <string>        =  amino acids where enzymatic cleavage occurs, c-terminal only. Default = KR" << endl;
-	cout << "  -a, --anti <string>       =  amino acids where enzymatic cleavage rules are ignored, c-terminal only. Default = P" << endl;
+	cout << "  -c, --loc <string>        =  amino acids where enzymatic cleavage occurs. Default = KR" << endl;
+	cout << "  -a, --anti <string>       =  amino acids where enzymatic cleavage rules are ignored. Default = [none]" << endl;
+  cout << "  -n, --enzymeN             =  n-terminal sense of enzyme. If not specified, enzyme sense uses c-terminal as default." << endl;
 }
 
 string marquee(){
@@ -139,8 +139,6 @@ int main(int argc, char* argv[])
 	metrics my_metrics;
 
 	cout << "XML File: " << my_params.filename << endl; 
-	cout << "MZML File: " << my_params.mzml << endl; 
-
 
   //Parse the pepXML file and return a list of PSMs
   my_peptide_lists.xml_parse(my_params);
@@ -173,7 +171,7 @@ int main(int argc, char* argv[])
     //Right now, the function can never return false
 	}
 
-	cout << "Extracting precursor ion signals from mzML file..." << endl;
+	cout << "Extracting precursor ion signals from " << my_params.mzml << " ..." << endl;
 	if(!sr.mzml(my_peptide_lists, my_params)){
 		cout << " Error reading mzML file. Exiting." << endl;
 		return -1;
@@ -227,7 +225,7 @@ int main(int argc, char* argv[])
 
 		string of;
 		of=my_params.filename;
-		of+=".json";
+		of+=".ds.json";
 		my_peptide_lists.json(of); //MH: I had to move this up here because there are horrid memory leaks that occur otherwise.
 	}
 	else{}

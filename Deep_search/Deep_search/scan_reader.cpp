@@ -10,7 +10,15 @@ bool scan_reader::mzml(peptide_lists& my_peptide_lists, my_parameters& my_params
 	BasicSpectrum mySpec;
   MzParser myfile(&mySpec);
 
-	if(!myfile.load(my_params.mzml.c_str())) return false;
+	if(!myfile.load(my_params.mzml.c_str())) {
+    string local= my_params.mzml;
+    size_t ret = local.find_last_of('\\');
+    if(ret==string::npos) local.find_last_of('/');
+    if(ret==string::npos) return false;
+    local=local.substr(ret+1,local.size());
+    cout << "WARNING: " << my_params.mzml << " not found. Attempting: " << local << endl;
+    if (!myfile.load(local.c_str())) return false;
+  }
 
 	//MH: We need to get through precursor peak extraction fast.
 	//To do so, we need to do it a) using a single pass through all arrays, and

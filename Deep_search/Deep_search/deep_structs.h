@@ -13,6 +13,7 @@ typedef struct dsXIC {
 
 typedef struct dsPSM {
   std::string pep_seq;
+  std::string pep_seq_stripped;
   std::string prot_seq;
 	bool decoy;
   bool proteotypic = 0;
@@ -79,7 +80,8 @@ typedef struct parameters {
 
 	double probability;   //peptide prophet probability parameter 
 	std::string filename; //filename parameter
-	bool iprophet;        //identifieer for ipro or peptide prophet 
+	bool enzymeSense;     //n-term=true, c-term=false
+  bool iprophet;        //identifieer for ipro or peptide prophet 
 	std::string mzml;     //spectra file
 	float ret_time; 
 	double ppm; 

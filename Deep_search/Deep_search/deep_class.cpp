@@ -22,15 +22,36 @@ void peptide_lists::xml_parse(my_parameters& my_params) {
   doc.parse<0>(&buffer[0]);
   // Find root node
   xml_node<>* root_node = doc.first_node("msms_pipeline_analysis");
+  
+  //determine if and which prophets were used.
+  bool bPProphet=false;
+  bool bIProphet=false;
+  xml_node<>* anal_node = root_node->first_node("analysis_summary");
+  while (anal_node != NULL) {
+    string tmp = anal_node->first_attribute("analysis")->value();
+    if (tmp.compare("peptideprophet")==0) bPProphet=true;
+    if (tmp.compare("interprophet") == 0) bIProphet = true;
+    anal_node = anal_node->next_sibling("analysis_summary");
+  }
+  if(bIProphet) {
+    cout << "iProphet deteced. Using iProbability." << endl;
+    my_params.iprophet=true;
+  } else if(bPProphet){
+    cout << "PeptideProphet detected. Using Probability." << endl;
+    my_params.iprophet=false;
+  } else {
+    cout << "PeptideProphet or iProphet validation is required. Please validate PSMs to obtain probability values before using DEEPsearch." << endl;
+    exit(24);
+  }
+
   xml_node<>* spectrum_node = root_node->first_node("msms_run_summary");
+  my_params.mzml = spectrum_node->first_attribute("base_name")->value();
+  my_params.mzml += spectrum_node->first_attribute("raw_data")->value();
 
   total_psms_in_xml = 0;
 
   for (spectrum_node; spectrum_node; spectrum_node = spectrum_node->next_sibling()){
       
-    //skip past the run summary?
-    if (string(spectrum_node->value()) == "msms_run_summary") continue;
-
     //grab the spectrum query
     for (xml_node<>* sample_node = spectrum_node->first_node("spectrum_query"); sample_node; sample_node = sample_node->next_sibling()) {
       total_psms_in_xml++;
@@ -68,6 +89,7 @@ void peptide_lists::xml_parse(my_parameters& my_params) {
       //Keeping this PSM, so record necessary information
       dsPSM psm;
       psm.pep_seq = string(search_hit->first_attribute("peptide")->value());
+      psm.pep_seq_stripped = psm.pep_seq;
       psm.charge = atoi(sample_node->first_attribute("assumed_charge")->value());
       psm.pre_neutral_mass = atof(sample_node->first_attribute("precursor_neutral_mass")->value());
       psm.xml_rtime = (float)atof(sample_node->first_attribute("retention_time_sec")->value());
@@ -108,21 +130,28 @@ void peptide_lists::xml_parse(my_parameters& my_params) {
 }
 
 bool peptide_lists::enzymatic_calc(my_parameters& my_params) {
-
-
+    
     for (size_t i = 0; i < all_psm.size(); i++) {
-        size_t found = my_params.cleave_loc.find(all_psm[i].prev_aa);
-        size_t found1 = my_params.cleave_loc.find(all_psm[i].pep_seq.back());
-        size_t found2 = my_params.hyphen.find(all_psm[i].next_aa);
-        if (found!= string::npos && (found1!=string::npos || found2!=string::npos)) {
-            all_psm[i].non_enzymatic = false; 
-        } else {
-          //check to see if the non-specific cut is the leading Met on the protein. If so, this is probably true enzymatic.
-          //ALSO: DO THIS SMARTER - LOOK IN THE DB
-          if (all_psm[i].prev_aa=='M') all_psm[i].non_enzymatic = false;
-          else all_psm[i].non_enzymatic = true;
-        }
-        
+      size_t found;
+      size_t found1;
+      size_t found2;
+      if(my_params.enzymeSense){  //n-terminal cleavage
+        found = my_params.cleave_loc.find(all_psm[i].next_aa);
+        found1 = my_params.cleave_loc.find(all_psm[i].pep_seq_stripped[0]); 
+        found2 = my_params.hyphen.find(all_psm[i].prev_aa);
+      } else { //c-terminal cleavage
+        found = my_params.cleave_loc.find(all_psm[i].prev_aa);
+        found1 = my_params.cleave_loc.find(all_psm[i].pep_seq_stripped.back());
+        found2 = my_params.hyphen.find(all_psm[i].next_aa);
+      }
+      if (found!= string::npos && (found1!=string::npos || found2!=string::npos)) {
+        all_psm[i].non_enzymatic = false; 
+      } else {
+        //check to see if the non-specific cut is the leading Met on the protein. If so, this is probably true enzymatic.
+        //ALSO: DO THIS SMARTER - LOOK IN THE DB
+        if (all_psm[i].prev_aa=='M' || all_psm[i].prev_aa=='-') all_psm[i].non_enzymatic = false;
+        else all_psm[i].non_enzymatic = true;
+      }
     }
     return true;
 
@@ -132,11 +161,21 @@ bool peptide_lists::miss_cleave(my_parameters& my_params) {
 
   for (int i = 0; i < all_psm.size(); i++) {
     all_psm[i].miss_cleaves=0;
-    for (int j = 0; j < all_psm[i].pep_seq.size() - 1; j++) {
-      size_t found = my_params.cleave_loc.find(all_psm[i].pep_seq[j]);
-      size_t found1 = my_params.anti_cleave_loc.find(all_psm [i].pep_seq[j + 1]);
-      if (found!=string::npos && found1==string::npos) {
-        all_psm[i].miss_cleaves++;
+    if (my_params.enzymeSense) {  //n-terminal cleavage
+      for (int j = 1; j < all_psm[i].pep_seq_stripped.size(); j++) {
+        size_t found = my_params.cleave_loc.find(all_psm[i].pep_seq_stripped[j]);
+        size_t found1 = my_params.anti_cleave_loc.find(all_psm[i].pep_seq_stripped[j - 1]);
+        if (found != string::npos && found1 == string::npos) {
+          all_psm[i].miss_cleaves++;
+        }
+      }
+    } else {
+      for (int j = 0; j < all_psm[i].pep_seq_stripped.size() - 1; j++) {
+        size_t found = my_params.cleave_loc.find(all_psm[i].pep_seq_stripped[j]);
+        size_t found1 = my_params.anti_cleave_loc.find(all_psm [i].pep_seq_stripped[j + 1]);
+        if (found!=string::npos && found1==string::npos) {
+          all_psm[i].miss_cleaves++;
+        }
       }
     }
   }
@@ -322,7 +361,7 @@ void peptide_lists::print(metrics& my_metrics, my_parameters& params, string mar
   sprintf(str, " Probability Cutoff: %.2lf", params.probability);
   addString(v, str);
   if(params.iprophet) sprintf(str, " Use iProphet Probability: yes");
-  else sprintf(str, " Use iProphet Probability: no");
+  else sprintf(str, " Use PeptideProphet Probability: yes");
   addString(v, str);
   sprintf(str, " Retention time tolerance (min): %.2f", params.ret_time);
   addString(v, str);
@@ -331,6 +370,9 @@ void peptide_lists::print(metrics& my_metrics, my_parameters& params, string mar
   sprintf(str, " Enzyme cut sites: %s", params.cleave_loc.c_str());
   addString(v, str);
   sprintf(str, " Enzyme cut exceptions: %s", params.anti_cleave_loc.c_str());
+  addString(v, str);
+  if (params.enzymeSense) sprintf(str, " Enzyme sense: N");
+  else sprintf(str, " Enzyme sense: C");
   addString(v, str);
 
   addString(v," ");
